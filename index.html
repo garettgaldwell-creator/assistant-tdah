@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mon Assistant TDAH</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,48 +14,95 @@
         }
 
         :root {
-            --primary: #FF6B6B;
-            --secondary: #4ECDC4;
-            --accent: #FFE66D;
-            --dark: #2C3E50;
-            --light: #F8F9FA;
-            --success: #51CF66;
-            --warning: #FFB84D;
-            --info: #5C7CFA;
+            --primary: #F4A460;
+            --secondary: #8FB886;
+            --accent: #FFD700;
+            --dark: #5C4033;
+            --light: #FFF9E6;
+            --success: #8FB886;
+            --warning: #F4A460;
+            --info: #87CEEB;
             --shadow: rgba(0, 0, 0, 0.1);
         }
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #87CEEB 0%, #FFE5B4 50%, #FFD700 100%);
             min-height: 100vh;
             padding: 20px;
             color: var(--dark);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 2%),
+                radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.2) 0%, transparent 2%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 1.5%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 1.5%),
+                radial-gradient(circle at 90% 60%, rgba(255, 255, 255, 0.25) 0%, transparent 2%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         header {
             text-align: center;
             margin-bottom: 40px;
             animation: slideDown 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .logo-img {
+            width: 120px;
+            height: auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
         }
 
         h1 {
             font-size: 3rem;
-            color: white;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-            margin-bottom: 10px;
+            color: var(--primary);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin: 0;
             font-weight: 700;
         }
 
         .subtitle {
-            color: var(--accent);
+            color: var(--secondary);
             font-size: 1.2rem;
-            font-weight: 300;
+            font-weight: 500;
+            margin-top: 10px;
         }
 
         .tabs {
@@ -101,16 +149,18 @@
         }
 
         .card {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 20px;
             padding: 30px;
             margin-bottom: 20px;
-            box-shadow: 0 8px 30px var(--shadow);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
             transition: transform 0.3s ease;
+            border: 2px solid rgba(244, 164, 96, 0.2);
         }
 
         .card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
         }
 
         .card-title {
@@ -422,18 +472,62 @@
             font-size: 4rem;
             margin: 10px 0;
         }
+
+        .period-btn {
+            background: white;
+            border: 2px solid var(--secondary);
+            color: var(--dark);
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 0 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .period-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .period-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .milestone-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .milestone-date {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🧠 Mon Assistant TDAH</h1>
-            <p class="subtitle">Ton allié pour une vie organisée et sereine</p>
+            <div class="logo-container">
+                <img src="logo-petit-prince.webp" alt="Le Petit Prince" class="logo-img">
+                <h1>Mon Assistant TDAH</h1>
+            </div>
+            <p class="subtitle">Du SESSAD Petit Prince</p>
         </header>
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tasks')">📋 Mes Tâches</button>
             <button class="tab-btn" onclick="switchTab('emotions')">❤️ Mes Émotions</button>
+            <button class="tab-btn" onclick="switchTab('stats')">📊 Mes Statistiques</button>
             <button class="tab-btn" onclick="switchTab('problem')">🧩 Résoudre un Problème</button>
             <button class="tab-btn" onclick="switchTab('focus')">⏱️ Focus Timer</button>
             <button class="tab-btn" onclick="switchTab('situations')">🎪 Situations du quotidien</button>
@@ -520,6 +614,55 @@
                 <textarea id="emotionJournal" placeholder="Décris ce qui se passe dans ta tête en ce moment... Qu'est-ce qui a déclenché cette émotion ?"></textarea>
                 <button onclick="saveEmotionEntry()">Enregistrer mon ressenti</button>
                 <div id="journalEntries"></div>
+            </div>
+        </div>
+
+        <!-- STATISTIQUES -->
+        <div id="stats" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">📊</span>Mes Statistiques</h2>
+                
+                <!-- Sélecteur de période -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <button onclick="changeStatsPeriod('today')" id="btn-today" class="period-btn active">Aujourd'hui</button>
+                    <button onclick="changeStatsPeriod('week')" id="btn-week" class="period-btn">7 derniers jours</button>
+                    <button onclick="changeStatsPeriod('month')" id="btn-month" class="period-btn">30 derniers jours</button>
+                </div>
+
+                <!-- Graphique des émotions -->
+                <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">📈 Évolution de mes émotions</h3>
+                    <canvas id="emotionsChart" style="max-height: 300px;"></canvas>
+                    <div id="emotionsChartLegend" style="margin-top: 15px; text-align: center;"></div>
+                </div>
+
+                <!-- Graphique des tâches -->
+                <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--secondary); margin-bottom: 20px;">✅ Progression des tâches</h3>
+                    <canvas id="tasksChart" style="max-height: 300px;"></canvas>
+                </div>
+
+                <!-- Statistiques résumées -->
+                <div class="grid-2">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center;">
+                        <div style="font-size: 3rem; font-weight: 700;" id="totalTasksCompleted">0</div>
+                        <div style="font-size: 1.2rem; margin-top: 10px;">Tâches complétées</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;" id="periodLabel">cette période</div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 25px; border-radius: 15px; color: white; text-align: center;">
+                        <div style="font-size: 3rem; font-weight: 700;" id="emotionMostFrequent">-</div>
+                        <div style="font-size: 1.2rem; margin-top: 10px;">Émotion dominante</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">cette période</div>
+                    </div>
+                </div>
+
+                <!-- Points d'étape -->
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin-top: 25px;">
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">🎯 Mes points d'étape</h3>
+                    <div id="milestonesList"></div>
+                    <button onclick="addMilestone()" style="margin-top: 15px;">➕ Ajouter un point d'étape</button>
+                </div>
             </div>
         </div>
 
@@ -768,6 +911,7 @@
             const clickedButton = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
                 btn.textContent.includes(tabName === 'tasks' ? 'Tâches' : 
                                         tabName === 'emotions' ? 'Émotions' :
+                                        tabName === 'stats' ? 'Statistiques' :
                                         tabName === 'problem' ? 'Problème' :
                                         tabName === 'focus' ? 'Focus Timer' :
                                         tabName === 'situations' ? 'Situations' : 'Astuces')
@@ -777,6 +921,10 @@
             // Charger les données pour cet onglet
             if (tabName === 'tasks') loadTasks();
             if (tabName === 'emotions') loadJournalEntries();
+            if (tabName === 'stats') {
+                updateStatsCharts();
+                loadMilestones();
+            }
         }
 
         // GESTION DES TÂCHES
@@ -1033,13 +1181,25 @@
             }
             
             const entries = JSON.parse(localStorage.getItem('emotionEntries')) || [];
-            entries.unshift({
+            const entry = {
                 emotion: selectedEmotion,
                 text: journal,
-                date: new Date().toLocaleString('fr-FR')
-            });
+                date: new Date().toLocaleString('fr-FR'),
+                timestamp: Date.now()
+            };
+            entries.unshift(entry);
             
-            localStorage.setItem('emotionEntries', JSON.stringify(entries.slice(0, 10)));
+            localStorage.setItem('emotionEntries', JSON.stringify(entries.slice(0, 50)));
+            
+            // Aussi sauvegarder pour les stats
+            const emotionStats = JSON.parse(localStorage.getItem('emotionStats')) || [];
+            emotionStats.push({
+                emotion: selectedEmotion,
+                timestamp: Date.now(),
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('emotionStats', JSON.stringify(emotionStats));
+            
             document.getElementById('emotionJournal').value = '';
             loadJournalEntries();
             
@@ -1468,6 +1628,297 @@
                     </ul>
                 </div>
             `;
+        }
+
+        // STATISTIQUES ET GRAPHIQUES
+        let emotionsChart = null;
+        let tasksChart = null;
+        let currentPeriod = 'today';
+
+        function changeStatsPeriod(period) {
+            currentPeriod = period;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + period).classList.add('active');
+            
+            // Mettre à jour le label
+            const labels = {
+                today: "aujourd'hui",
+                week: "cette semaine",
+                month: "ce mois"
+            };
+            document.getElementById('periodLabel').textContent = labels[period];
+            
+            // Mettre à jour les graphiques
+            updateStatsCharts();
+        }
+
+        function updateStatsCharts() {
+            updateEmotionsChart();
+            updateTasksChart();
+            updateSummaryStats();
+        }
+
+        function getDateRange(period) {
+            const now = Date.now();
+            let startDate;
+            
+            if (period === 'today') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                startDate = today.getTime();
+            } else if (period === 'week') {
+                startDate = now - (7 * 24 * 60 * 60 * 1000);
+            } else {
+                startDate = now - (30 * 24 * 60 * 60 * 1000);
+            }
+            
+            return { startDate, endDate: now };
+        }
+
+        function updateEmotionsChart() {
+            const emotionStats = JSON.parse(localStorage.getItem('emotionStats')) || [];
+            const { startDate, endDate } = getDateRange(currentPeriod);
+            
+            // Filtrer par période
+            const filteredEmotions = emotionStats.filter(e => 
+                e.timestamp >= startDate && e.timestamp <= endDate
+            );
+            
+            // Compter les émotions
+            const emotionCounts = {};
+            filteredEmotions.forEach(e => {
+                emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+            });
+            
+            // Si on regarde aujourd'hui, grouper par heure
+            let chartData;
+            if (currentPeriod === 'today') {
+                chartData = getEmotionsByHour(filteredEmotions);
+            } else {
+                chartData = {
+                    labels: Object.keys(emotionCounts),
+                    data: Object.values(emotionCounts)
+                };
+            }
+            
+            const ctx = document.getElementById('emotionsChart');
+            
+            // Détruire l'ancien graphique s'il existe
+            if (emotionsChart) {
+                emotionsChart.destroy();
+            }
+            
+            const emotionColors = {
+                joyeux: '#FFE66D',
+                calme: '#4ECDC4',
+                anxieux: '#FF6B6B',
+                frustré: '#FFB84D',
+                triste: '#95E1D3',
+                débordé: '#F38181',
+                excité: '#AA96DA',
+                fatigué: '#C7CEEA'
+            };
+            
+            emotionsChart = new Chart(ctx, {
+                type: currentPeriod === 'today' ? 'line' : 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: currentPeriod === 'today' ? 
+                        Object.keys(chartData.datasets).map(emotion => ({
+                            label: emotion.charAt(0).toUpperCase() + emotion.slice(1),
+                            data: chartData.datasets[emotion],
+                            borderColor: emotionColors[emotion] || '#999',
+                            backgroundColor: (emotionColors[emotion] || '#999') + '40',
+                            tension: 0.4,
+                            fill: true
+                        })) :
+                        [{
+                            label: 'Nombre de fois',
+                            data: chartData.data,
+                            backgroundColor: chartData.labels.map(label => emotionColors[label] || '#999')
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: currentPeriod === 'today'
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getEmotionsByHour(emotions) {
+            const hours = Array.from({length: 24}, (_, i) => i + 'h');
+            const datasets = {};
+            
+            emotions.forEach(e => {
+                const date = new Date(e.timestamp);
+                const hour = date.getHours();
+                
+                if (!datasets[e.emotion]) {
+                    datasets[e.emotion] = new Array(24).fill(0);
+                }
+                datasets[e.emotion][hour]++;
+            });
+            
+            return { labels: hours, datasets };
+        }
+
+        function updateTasksChart() {
+            const { startDate, endDate } = getDateRange(currentPeriod);
+            
+            // Filtrer les tâches par période
+            const filteredTasks = tasks.filter(t => {
+                const taskDate = new Date(t.date.split('/').reverse().join('-')).getTime();
+                return taskDate >= startDate && taskDate <= endDate;
+            });
+            
+            const completed = filteredTasks.filter(t => t.completed).length;
+            const pending = filteredTasks.length - completed;
+            
+            const ctx = document.getElementById('tasksChart');
+            
+            if (tasksChart) {
+                tasksChart.destroy();
+            }
+            
+            tasksChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Complétées', 'En cours'],
+                    datasets: [{
+                        data: [completed, pending],
+                        backgroundColor: ['#51CF66', '#FFB84D'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryStats() {
+            const { startDate, endDate } = getDateRange(currentPeriod);
+            const emotionStats = JSON.parse(localStorage.getItem('emotionStats')) || [];
+            
+            // Tâches complétées
+            const filteredTasks = tasks.filter(t => {
+                const taskDate = new Date(t.date.split('/').reverse().join('-')).getTime();
+                return t.completed && taskDate >= startDate && taskDate <= endDate;
+            });
+            document.getElementById('totalTasksCompleted').textContent = filteredTasks.length;
+            
+            // Émotion dominante
+            const filteredEmotions = emotionStats.filter(e => 
+                e.timestamp >= startDate && e.timestamp <= endDate
+            );
+            
+            const emotionCounts = {};
+            filteredEmotions.forEach(e => {
+                emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+            });
+            
+            if (Object.keys(emotionCounts).length > 0) {
+                const mostFrequent = Object.entries(emotionCounts)
+                    .sort((a, b) => b[1] - a[1])[0];
+                
+                const emotionEmojis = {
+                    joyeux: '😊',
+                    calme: '😌',
+                    anxieux: '😰',
+                    frustré: '😤',
+                    triste: '😢',
+                    débordé: '🤯',
+                    excité: '🤩',
+                    fatigué: '😴'
+                };
+                
+                document.getElementById('emotionMostFrequent').textContent = 
+                    emotionEmojis[mostFrequent[0]] + ' ' + mostFrequent[0].charAt(0).toUpperCase() + mostFrequent[0].slice(1);
+            } else {
+                document.getElementById('emotionMostFrequent').textContent = '-';
+            }
+        }
+
+        // POINTS D'ÉTAPE (MILESTONES)
+        function addMilestone() {
+            const text = prompt('Décris ton point d\'étape ou ton objectif :');
+            if (!text || text.trim() === '') return;
+            
+            const milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            milestones.push({
+                id: Date.now(),
+                text: text,
+                date: new Date().toLocaleString('fr-FR'),
+                completed: false
+            });
+            
+            localStorage.setItem('milestones', JSON.stringify(milestones));
+            loadMilestones();
+        }
+
+        function loadMilestones() {
+            const milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            const container = document.getElementById('milestonesList');
+            
+            if (milestones.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Aucun point d\'étape pour le moment. Ajoute-en un !</p>';
+                return;
+            }
+            
+            container.innerHTML = milestones.map(m => `
+                <div class="milestone-item ${m.completed ? 'completed' : ''}">
+                    <div style="flex: 1;">
+                        <input type="checkbox" ${m.completed ? 'checked' : ''} 
+                               onchange="toggleMilestone(${m.id})" 
+                               style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                        <strong>${m.text}</strong>
+                        <div class="milestone-date">${m.date}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteMilestone(${m.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function toggleMilestone(id) {
+            const milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            const milestone = milestones.find(m => m.id === id);
+            if (milestone) {
+                milestone.completed = !milestone.completed;
+                localStorage.setItem('milestones', JSON.stringify(milestones));
+                loadMilestones();
+            }
+        }
+
+        function deleteMilestone(id) {
+            if (!confirm('Supprimer ce point d\'étape ?')) return;
+            let milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            milestones = milestones.filter(m => m.id !== id);
+            localStorage.setItem('milestones', JSON.stringify(milestones));
+            loadMilestones();
         }
 
         // Chargement initial
