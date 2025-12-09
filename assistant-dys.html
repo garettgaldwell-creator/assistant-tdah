@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Assistant Dys</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #F4A460;
+            --secondary: #8FB886;
+            --accent: #FFD700;
+            --dark: #5C4033;
+            --light: #FFF9E6;
+            --success: #8FB886;
+            --warning: #F4A460;
+            --info: #87CEEB;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #87CEEB 0%, #FFE5B4 50%, #FFD700 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--dark);
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 2%),
+                radial-gradient(circle at 60% 70%, rgba(255, 255, 255, 0.2) 0%, transparent 2%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 1.5%),
+                radial-gradient(circle at 40% 80%, rgba(255, 255, 255, 0.2) 0%, transparent 1.5%),
+                radial-gradient(circle at 90% 60%, rgba(255, 255, 255, 0.25) 0%, transparent 2%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.5s ease-out;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .logo-img {
+            width: 120px;
+            height: auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: var(--primary);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            animation: slideUp 0.5s ease-out 0.2s both;
+        }
+
+        .tab-btn {
+            background: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+            font-family: 'Poppins', sans-serif;
+            color: var(--dark);
+        }
+
+        .tab-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+            border: 2px solid rgba(244, 164, 96, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emoji {
+            font-size: 1.8rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .task-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .task-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .task-item:hover {
+            transform: translateX(10px);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-priority {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .priority-urgent {
+            background: var(--primary);
+            color: white;
+        }
+
+        .priority-important {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .priority-normal {
+            background: var(--success);
+            color: white;
+        }
+
+        .priority-later {
+            background: var(--info);
+            color: white;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--primary);
+            padding: 5px 10px;
+            font-size: 1.2rem;
+        }
+
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .emotion-card {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--info) 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .emotion-card:hover {
+            transform: scale(1.1) rotate(2deg);
+        }
+
+        .emotion-card.selected {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--warning) 100%);
+            transform: scale(1.05);
+        }
+
+        .emotion-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .problem-steps {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .step {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid var(--secondary);
+        }
+
+        .step-number {
+            background: var(--secondary);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .tips-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .tip-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .tip-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .result-box {
+            background: #e8f5e9;
+            border: 2px solid var(--success);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--secondary) 100%);
+            transition: width 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-family: 'Space Mono', monospace;
+            text-align: center;
+            color: var(--primary);
+            margin: 20px 0;
+            font-weight: 700;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .energy-meter {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .energy-level {
+            font-size: 4rem;
+            margin: 10px 0;
+        }
+
+        .period-btn {
+            background: white;
+            border: 2px solid var(--secondary);
+            color: var(--dark);
+            padding: 10px 20px;
+            border-radius: 25px;
+            margin: 0 5px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .period-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .period-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .milestone-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid var(--accent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .milestone-date {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-container">
+                <img src="logo-petit-prince.webp" alt="Le Petit Prince" class="logo-img">
+                <h1>Mon Assistant Dys</h1>
+            </div>
+            <p class="subtitle">Du SESSAD Petit Prince</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('tasks')">📋 Mes Tâches</button>
+            <button class="tab-btn" onclick="switchTab('emotions')">❤️ Mes Émotions</button>
+            <button class="tab-btn" onclick="switchTab('stats')">📊 Mes Statistiques</button>
+            <button class="tab-btn" onclick="switchTab('problem')">🧩 Résoudre un Problème</button>
+            <button class="tab-btn" onclick="switchTab('focus')">⏱️ Focus Timer</button>
+            <button class="tab-btn" onclick="switchTab('situations')">🎪 Situations du quotidien</button>
+            <button class="tab-btn" onclick="switchTab('tips')">💡 Astuces Dys</button>
+        </div>
+
+        <!-- TÂCHES -->
+        <div id="tasks" class="tab-content active">
+            <div class="grid-2">
+                <div class="card">
+                    <h2 class="card-title"><span class="emoji">➕</span>Ajouter une tâche</h2>
+                    <input type="text" id="taskInput" placeholder="Quelle est la tâche ?" />
+                    <select id="prioritySelect">
+                        <option value="urgent">🔴 Urgent (à faire maintenant)</option>
+                        <option value="important">🟡 Important (aujourd'hui)</option>
+                        <option value="normal" selected>🟢 Normal (cette semaine)</option>
+                        <option value="later">🔵 Plus tard (quand possible)</option>
+                    </select>
+                    <button onclick="addTask()">Ajouter la tâche</button>
+                </div>
+
+                <div class="card">
+                    <h2 class="card-title"><span class="emoji">📊</span>Mon progrès</h2>
+                    <div class="energy-meter">
+                        <p><strong>Tâches complétées aujourd'hui</strong></p>
+                        <div class="energy-level" id="completedCount">0</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">📝</span>Ma liste de tâches</h2>
+                <div class="task-list" id="taskList"></div>
+            </div>
+        </div>
+
+        <!-- ÉMOTIONS -->
+        <div id="emotions" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">🎭</span>Comment je me sens ?</h2>
+                <p>Clique sur l'émotion qui te correspond le mieux en ce moment :</p>
+                <div class="emotion-grid">
+                    <div class="emotion-card" onclick="selectEmotion('joyeux', this)">
+                        <div class="emotion-icon">😊</div>
+                        <div>Joyeux</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('calme', this)">
+                        <div class="emotion-icon">😌</div>
+                        <div>Calme</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('anxieux', this)">
+                        <div class="emotion-icon">😰</div>
+                        <div>Anxieux</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('frustré', this)">
+                        <div class="emotion-icon">😤</div>
+                        <div>Frustré</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('triste', this)">
+                        <div class="emotion-icon">😢</div>
+                        <div>Triste</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('débordé', this)">
+                        <div class="emotion-icon">🤯</div>
+                        <div>Débordé</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('excité', this)">
+                        <div class="emotion-icon">🤩</div>
+                        <div>Excité</div>
+                    </div>
+                    <div class="emotion-card" onclick="selectEmotion('fatigué', this)">
+                        <div class="emotion-icon">😴</div>
+                        <div>Fatigué</div>
+                    </div>
+                </div>
+                <div id="emotionResult"></div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">✍️</span>Journal émotionnel</h2>
+                <textarea id="emotionJournal" placeholder="Décris ce qui se passe dans ta tête en ce moment... Qu'est-ce qui a déclenché cette émotion ?"></textarea>
+                <button onclick="saveEmotionEntry()">Enregistrer mon ressenti</button>
+                <div id="journalEntries"></div>
+            </div>
+        </div>
+
+        <!-- STATISTIQUES -->
+        <div id="stats" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">📊</span>Mes Statistiques</h2>
+                
+                <!-- Sélecteur de période -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <button onclick="changeStatsPeriod('today')" id="btn-today" class="period-btn active">Aujourd'hui</button>
+                    <button onclick="changeStatsPeriod('week')" id="btn-week" class="period-btn">7 derniers jours</button>
+                    <button onclick="changeStatsPeriod('month')" id="btn-month" class="period-btn">30 derniers jours</button>
+                </div>
+
+                <!-- Graphique des émotions -->
+                <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">📈 Évolution de mes émotions</h3>
+                    <canvas id="emotionsChart" style="max-height: 300px;"></canvas>
+                    <div id="emotionsChartLegend" style="margin-top: 15px; text-align: center;"></div>
+                </div>
+
+                <!-- Graphique des tâches -->
+                <div style="background: white; padding: 25px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--secondary); margin-bottom: 20px;">✅ Progression des tâches</h3>
+                    <canvas id="tasksChart" style="max-height: 300px;"></canvas>
+                </div>
+
+                <!-- Statistiques résumées -->
+                <div class="grid-2">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; color: white; text-align: center;">
+                        <div style="font-size: 3rem; font-weight: 700;" id="totalTasksCompleted">0</div>
+                        <div style="font-size: 1.2rem; margin-top: 10px;">Tâches complétées</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;" id="periodLabel">cette période</div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 25px; border-radius: 15px; color: white; text-align: center;">
+                        <div style="font-size: 3rem; font-weight: 700;" id="emotionMostFrequent">-</div>
+                        <div style="font-size: 1.2rem; margin-top: 10px;">Émotion dominante</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8; margin-top: 5px;">cette période</div>
+                    </div>
+                </div>
+
+                <!-- Points d'étape -->
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin-top: 25px;">
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">🎯 Mes points d'étape</h3>
+                    <div id="milestonesList"></div>
+                    <button onclick="addMilestone()" style="margin-top: 15px;">➕ Ajouter un point d'étape</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RÉSOLUTION DE PROBLÈME -->
+        <div id="problem" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">🎯</span>Analyse fonctionnelle du problème</h2>
+                <p style="margin-bottom: 20px;">Cette méthode t'aide à comprendre POURQUOI le comportement/problème existe et comment le changer.</p>
+                
+                <div class="problem-steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <strong>Situation déclenchante (AVANT)</strong>
+                        <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">Qu'est-ce qui se passe juste avant le problème ? Où es-tu ? Que fais-tu ? Avec qui ?</p>
+                        <textarea id="problemBefore" placeholder="Ex: Je suis seul dans ma chambre, je dois étudier, il est 14h après le déjeuner..."></textarea>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <strong>Le comportement/problème (PENDANT)</strong>
+                        <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">Décris précisément ce que tu fais. Sois factuel et observable.</p>
+                        <textarea id="problemBehavior" placeholder="Ex: Je scroll sur mon téléphone pendant 2h au lieu d'étudier..."></textarea>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <strong>Conséquences immédiates (APRÈS)</strong>
+                        <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">Qu'est-ce que ce comportement t'apporte immédiatement ? (même si c'est négatif à long terme)</p>
+                        <textarea id="problemAfter" placeholder="Ex: Je me sens moins stressé, je suis distrait de mon anxiété, j'évite la difficulté..."></textarea>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">4</span>
+                        <strong>Fonction du comportement</strong>
+                        <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">Quel besoin satisfait ce comportement ?</p>
+                        <select id="problemFunction">
+                            <option value="">-- Choisis la fonction principale --</option>
+                            <option value="escape">Éviter/Échapper (stress, ennui, difficulté, émotions négatives)</option>
+                            <option value="attention">Obtenir de l'attention (même négative)</option>
+                            <option value="tangible">Obtenir quelque chose de concret (objet, activité plaisante, stimulation)</option>
+                            <option value="sensory">Stimulation sensorielle (besoin de bouger, de stimulation)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">5</span>
+                        <strong>Comportement alternatif</strong>
+                        <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">Quel comportement pourrait satisfaire le MÊME besoin de façon plus adaptée ?</p>
+                        <textarea id="problemAlternative" placeholder="Ex: Si je cherche à éviter le stress -> je peux faire 5 min de respiration avant d'étudier, découper la tâche en 10 min..."></textarea>
+                    </div>
+                    
+                    <div class="step">
+                        <span class="step-number">6</span>
+                        <strong>Première action concrète</strong>
+                        <p style="font-size: 0.9rem; color: #666; margin: 5px 0;">La TOUTE première micro-action pour mettre en place l'alternative</p>
+                        <input type="text" id="problemFirstStep" placeholder="Ex: Mettre mon téléphone dans une autre pièce avant de commencer" />
+                    </div>
+                    
+                    <button onclick="solveProblem()">Analyser et créer mon plan</button>
+                </div>
+                <div id="problemResult"></div>
+            </div>
+        </div>
+
+        <!-- FOCUS TIMER -->
+        <div id="focus" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">⏱️</span>Pomodoro Focus Timer</h2>
+                <p style="text-align: center; margin-bottom: 20px;">Travaille par sessions courtes pour maintenir ta concentration</p>
+                <div class="timer-display" id="timerDisplay">25:00</div>
+                <div class="timer-controls">
+                    <button onclick="startTimer()">▶️ Démarrer</button>
+                    <button onclick="pauseTimer()">⏸️ Pause</button>
+                    <button onclick="resetTimer()">🔄 Reset</button>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <select id="timerDuration" onchange="changeTimerDuration()">
+                        <option value="15">15 minutes</option>
+                        <option value="25" selected>25 minutes (Pomodoro)</option>
+                        <option value="45">45 minutes</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">⚡</span>Mon niveau d'énergie</h2>
+                <p style="text-align: center;">Adapte tes tâches à ton énergie du moment</p>
+                <div class="emotion-grid">
+                    <div class="emotion-card" onclick="suggestByEnergy('high')">
+                        <div class="emotion-icon">🚀</div>
+                        <div>Haute énergie</div>
+                    </div>
+                    <div class="emotion-card" onclick="suggestByEnergy('medium')">
+                        <div class="emotion-icon">⚡</div>
+                        <div>Énergie moyenne</div>
+                    </div>
+                    <div class="emotion-card" onclick="suggestByEnergy('low')">
+                        <div class="emotion-icon">🔋</div>
+                        <div>Basse énergie</div>
+                    </div>
+                </div>
+                <div id="energySuggestions"></div>
+            </div>
+        </div>
+
+        <!-- SITUATIONS DU QUOTIDIEN -->
+        <div id="situations" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">🎪</span>Recommandations par situation</h2>
+                <p style="margin-bottom: 20px;">Sélectionne la situation que tu vis en ce moment et découvre des stratégies adaptées :</p>
+                
+                <div class="emotion-grid">
+                    <div class="emotion-card" onclick="showSituation('procrastination')">
+                        <div class="emotion-icon">⏰</div>
+                        <div>Procrastination</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('submergé')">
+                        <div class="emotion-icon">🌊</div>
+                        <div>Je suis submergé</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('distraction')">
+                        <div class="emotion-icon">🎯</div>
+                        <div>Impossible de me concentrer</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('hyperfocus')">
+                        <div class="emotion-icon">🔥</div>
+                        <div>Hyperfocus</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('transitions')">
+                        <div class="emotion-icon">🔄</div>
+                        <div>Difficultés de transition</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('matin')">
+                        <div class="emotion-icon">🌅</div>
+                        <div>Démarrage difficile</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('soir')">
+                        <div class="emotion-icon">🌙</div>
+                        <div>Coucher difficile</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('social')">
+                        <div class="emotion-icon">👥</div>
+                        <div>Situations sociales</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('decisions')">
+                        <div class="emotion-icon">🤔</div>
+                        <div>Paralysie décisionnelle</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('rejection')">
+                        <div class="emotion-icon">💔</div>
+                        <div>Sensibilité au rejet</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('impulsivité')">
+                        <div class="emotion-icon">⚡</div>
+                        <div>Impulsivité</div>
+                    </div>
+                    <div class="emotion-card" onclick="showSituation('ennui')">
+                        <div class="emotion-icon">😑</div>
+                        <div>Ennui intense</div>
+                    </div>
+                </div>
+                
+                <div id="situationResult"></div>
+            </div>
+        </div>
+
+        <!-- ASTUCES -->
+        <div id="tips" class="tab-content">
+            <div class="tips-container">
+                <div class="tip-card">
+                    <div class="tip-icon">📖</div>
+                    <h3>Police adaptée (Dyslexie)</h3>
+                    <p>Utilise des polices sans empattement comme Arial, Verdana ou OpenDyslexic. Augmente la taille (14pt minimum) et l'espacement entre les lignes.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎨</div>
+                    <h3>Couleurs et surlignage</h3>
+                    <p>Surligne les informations importantes en couleur. Utilise des fonds colorés légers (beige, vert pâle) pour réduire la fatigue visuelle.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎧</div>
+                    <h3>Lecture audio</h3>
+                    <p>Utilise des outils de synthèse vocale pour lire les textes à haute voix. Écouter aide souvent plus que lire.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">✍️</div>
+                    <h3>Écriture alternative</h3>
+                    <p>Privilégie le clavier à l'écriture manuscrite si c'est plus facile. Utilise des correcteurs orthographiques et des prédicteurs de mots.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🗣️</div>
+                    <h3>Parle à voix haute</h3>
+                    <p>Verbalise tes pensées, répète les consignes oralement. Ça aide à mieux mémoriser et comprendre.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📐</div>
+                    <h3>Supports visuels (Dyspraxie)</h3>
+                    <p>Utilise des schémas, cartes mentales, pictogrammes. Les images aident à compenser les difficultés de planification.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎯</div>
+                    <h3>Découpage des tâches</h3>
+                    <p>Divise chaque activité en petites étapes claires et numérotées. Une étape = une action simple.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🔢</div>
+                    <h3>Manipuler pour compter (Dyscalculie)</h3>
+                    <p>Utilise des objets concrets (cubes, jetons, doigts) pour visualiser les quantités et les opérations mathématiques.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📱</div>
+                    <h3>Outils numériques</h3>
+                    <p>Calculatrice, tableur, applications de conversion... Les outils tech sont tes alliés, utilise-les sans culpabilité !</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">⏰</div>
+                    <h3>Temps étendu</h3>
+                    <p>Demande plus de temps pour les tâches et examens. C'est un aménagement légitime, pas de la triche.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎤</div>
+                    <h3>Expression orale privilégiée</h3>
+                    <p>Quand c'est possible, réponds oralement plutôt qu'à l'écrit. Tu peux utiliser l'enregistrement audio.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🧠</div>
+                    <h3>Multisensoriel</h3>
+                    <p>Combine vue, ouïe, toucher et mouvement pour apprendre. Plus tu utilises de sens, mieux tu mémorises !</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📝</div>
+                    <h3>Consignes simplifiées</h3>
+                    <p>Reformule les consignes avec tes propres mots. Découpe les phrases longues en plusieurs courtes.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎮</div>
+                    <h3>Gamification</h3>
+                    <p>Transforme l'apprentissage en jeu. Les applications ludiques rendent l'entraînement plus motivant !</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">💪</div>
+                    <h3>Tes forces d'abord</h3>
+                    <p>Concentre-toi sur ce que tu fais bien. Les troubles Dys ne définissent pas ton intelligence ni tes capacités !</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🤝</div>
+                    <h3>Demande de l'aide</h3>
+                    <p>N'hésite jamais à demander des explications supplémentaires, des reformulations, ou des aménagements. C'est ton droit !</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // GESTION DES ONGLETS
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+            
+            // Activer le bouton cliqué
+            const clickedButton = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
+                btn.textContent.includes(tabName === 'tasks' ? 'Tâches' : 
+                                        tabName === 'emotions' ? 'Émotions' :
+                                        tabName === 'stats' ? 'Statistiques' :
+                                        tabName === 'problem' ? 'Problème' :
+                                        tabName === 'focus' ? 'Focus Timer' :
+                                        tabName === 'situations' ? 'Situations' : 'Astuces')
+            );
+            if (clickedButton) clickedButton.classList.add('active');
+            
+            // Charger les données pour cet onglet
+            if (tabName === 'tasks') loadTasks();
+            if (tabName === 'emotions') loadJournalEntries();
+            if (tabName === 'stats') {
+                updateStatsCharts();
+                loadMilestones();
+            }
+        }
+
+        // GESTION DES TÂCHES
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const priority = document.getElementById('prioritySelect').value;
+            
+            if (taskInput.value.trim() === '') {
+                alert('Entre une tâche !');
+                return;
+            }
+            
+            const task = {
+                id: Date.now(),
+                text: taskInput.value,
+                priority: priority,
+                completed: false,
+                date: new Date().toLocaleDateString('fr-FR')
+            };
+            
+            tasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            taskInput.value = '';
+            loadTasks();
+        }
+        
+        function loadTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<p style="text-align: center; color: #999;">Aucune tâche pour le moment. Ajoute-en une ! 🎯</p>';
+                return;
+            }
+            
+            // Trier par priorité
+            const priorityOrder = { urgent: 0, important: 1, normal: 2, later: 3 };
+            tasks.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
+            
+            tasks.forEach(task => {
+                const taskItem = document.createElement('div');
+                taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+                taskItem.innerHTML = `
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id})">
+                    <div class="task-content">
+                        <strong>${task.text}</strong>
+                        <div style="font-size: 0.9rem; color: #666; margin-top: 5px;">${task.date}</div>
+                    </div>
+                    <span class="task-priority priority-${task.priority}">
+                        ${task.priority === 'urgent' ? '🔴 Urgent' : 
+                          task.priority === 'important' ? '🟡 Important' : 
+                          task.priority === 'normal' ? '🟢 Normal' : '🔵 Plus tard'}
+                    </span>
+                    <button class="delete-btn" onclick="deleteTask(${task.id})">🗑️</button>
+                `;
+                taskList.appendChild(taskItem);
+            });
+            
+            updateProgress();
+        }
+        
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            task.completed = !task.completed;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            loadTasks();
+        }
+        
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            loadTasks();
+        }
+        
+        function updateProgress() {
+            const completed = tasks.filter(t => t.completed).length;
+            const total = tasks.length;
+            const percentage = total > 0 ? (completed / total) * 100 : 0;
+            
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('progressBar').style.width = percentage + '%';
+        }
+
+        // GESTION DES ÉMOTIONS
+        let selectedEmotion = '';
+        
+        function selectEmotion(emotion, element) {
+            selectedEmotion = emotion;
+            document.querySelectorAll('.emotion-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            const emotionData = {
+                joyeux: {
+                    suggestion: 'Super ! Profite de cette énergie positive pour attaquer des tâches que tu repoussais. C\'est le moment idéal ! 🌟',
+                    besoins: [
+                        '✨ Besoin de partager ta joie',
+                        '🎯 Besoin d\'utiliser cette énergie de façon productive',
+                        '🎉 Besoin de célébrer tes réussites',
+                        '🌱 Besoin de cultiver ce moment positif'
+                    ],
+                    actions: [
+                        'Lance-toi dans un projet qui te motive',
+                        'Partage ta joie avec quelqu\'un',
+                        'Note ce qui t\'a rendu joyeux (pour y revenir plus tard)',
+                        'Utilise cette énergie pour les tâches difficiles'
+                    ]
+                },
+                calme: {
+                    suggestion: 'Excellent état pour réfléchir et planifier. Prends le temps d\'organiser ta journée ou de faire des tâches qui demandent de la concentration. 🧘',
+                    besoins: [
+                        '🧘 Besoin de préserver ce calme intérieur',
+                        '🎯 Besoin de clarté mentale',
+                        '📋 Besoin d\'organiser tes pensées',
+                        '🌿 Besoin de tâches qui demandent de la réflexion'
+                    ],
+                    actions: [
+                        'Fais ta planification de la semaine',
+                        'Attaque les tâches qui demandent de la concentration',
+                        'Médite ou fais des exercices de respiration',
+                        'Écris dans ton journal pour clarifier tes idées'
+                    ]
+                },
+                anxieux: {
+                    suggestion: 'Respire profondément. Fais une pause, sors marcher 5 minutes, ou fais une activité qui t\'apaise. L\'anxiété passera. 🌬️',
+                    besoins: [
+                        '🛡️ Besoin de sécurité et de réassurance',
+                        '🌬️ Besoin de calmer ton système nerveux',
+                        '🎯 Besoin de reprendre le contrôle',
+                        '💪 Besoin de te sentir capable'
+                    ],
+                    actions: [
+                        'Respiration 4-7-8 (inspire 4s, retiens 7s, expire 8s)',
+                        'Nomme 5 choses que tu vois, 4 que tu touches, 3 que tu entends',
+                        'Écris ce qui t\'angoisse pour le sortir de ta tête',
+                        'Fais une micro-tâche facile pour retrouver un sentiment de contrôle'
+                    ]
+                },
+                frustré: {
+                    suggestion: 'C\'est ok d\'être frustré. Prends une pause active : bouge, écoute de la musique énergique, ou évacue en écrivant ce qui te frustre. 💪',
+                    besoins: [
+                        '💨 Besoin d\'évacuer cette énergie bloquée',
+                        '🎯 Besoin de résoudre ce qui bloque',
+                        '👂 Besoin d\'être entendu et compris',
+                        '💪 Besoin de retrouver ton pouvoir d\'action'
+                    ],
+                    actions: [
+                        'Fais 10 squats ou sors marcher rapidement',
+                        'Écris rageusement ce qui te frustre (puis déchire la feuille)',
+                        'Mets de la musique énergique et danse',
+                        'Identifie UNE chose concrète que tu peux changer'
+                    ]
+                },
+                triste: {
+                    suggestion: 'Sois doux avec toi-même. Fais des choses simples et réconfortantes. Pas besoin d\'être productif aujourd\'hui si ce n\'est pas le bon moment. 🌈',
+                    besoins: [
+                        '🤗 Besoin de réconfort et de douceur',
+                        '😢 Besoin d\'exprimer ta tristesse',
+                        '🫂 Besoin de connexion humaine',
+                        '🛌 Besoin de prendre soin de toi'
+                    ],
+                    actions: [
+                        'Appelle ou écris à quelqu\'un de confiance',
+                        'Fais quelque chose de réconfortant (couverture, thé, musique douce)',
+                        'Autorise-toi à pleurer si tu en as besoin',
+                        'Ne force rien aujourd\'hui, repose-toi'
+                    ]
+                },
+                débordé: {
+                    suggestion: 'Stop ! Fais une liste de TOUT ce qui te stresse. Puis choisis UNE SEULE mini-tâche à faire maintenant. Le reste peut attendre. 🛑',
+                    besoins: [
+                        '🛑 Besoin d\'arrêter et de faire une pause',
+                        '📝 Besoin d\'organiser le chaos mental',
+                        '🎯 Besoin de simplifier et prioriser',
+                        '💪 Besoin de retrouver un sentiment de contrôle'
+                    ],
+                    actions: [
+                        'Brain dump : écris TOUT sur papier pendant 5 min',
+                        'Respire 10 fois profondément',
+                        'Choisis UNE SEULE tâche mini à faire maintenant',
+                        'Dis NON ou demande de l\'aide pour le reste'
+                    ]
+                },
+                excité: {
+                    suggestion: 'Canalise cette énergie ! C\'est parfait pour faire avancer des projets créatifs ou des tâches dynamiques. Attention à ne pas te disperser ! ⚡',
+                    besoins: [
+                        '⚡ Besoin de canaliser cette énergie',
+                        '🎨 Besoin de créer et d\'explorer',
+                        '🎯 Besoin de focus pour ne pas te disperser',
+                        '🚀 Besoin d\'action et de mouvement'
+                    ],
+                    actions: [
+                        'Choisis UN projet et mets un timer de 25 min',
+                        'Fais une liste rapide pour capturer toutes tes idées',
+                        'Lance-toi dans quelque chose de créatif',
+                        'Bouge ton corps : danse, marche rapide, sport'
+                    ]
+                },
+                fatigué: {
+                    suggestion: 'Ton corps te parle. Soit tu te reposes, soit tu fais des mini-tâches faciles. Ne force pas. Le repos n\'est pas de la paresse. 😴',
+                    besoins: [
+                        '😴 Besoin de repos et de récupération',
+                        '🔋 Besoin de recharger ton énergie',
+                        '💤 Besoin de respecter tes limites',
+                        '🌙 Besoin de sommeil de qualité'
+                    ],
+                    actions: [
+                        'Fais une micro-sieste de 20 min si possible',
+                        'Hydrate-toi et mange quelque chose de nourrissant',
+                        'Ne fais que des tâches automatiques et faciles',
+                        'Planifie un vrai temps de repos ce soir'
+                    ]
+                }
+            };
+            
+            const data = emotionData[emotion];
+            
+            const resultDiv = document.getElementById('emotionResult');
+            resultDiv.innerHTML = `
+                <div class="result-box">
+                    <h3>💡 Suggestion personnalisée</h3>
+                    <p style="font-size: 1.1rem; margin-bottom: 20px;">${data.suggestion}</p>
+                    
+                    <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 20px; border-radius: 10px; margin: 15px 0;">
+                        <h4 style="margin-bottom: 15px;">🎯 Besoins identifiés :</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            ${data.besoins.map(besoin => `
+                                <li style="margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.6); border-radius: 5px;">
+                                    ${besoin}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 10px; border: 2px solid var(--secondary);">
+                        <h4 style="color: var(--secondary); margin-bottom: 15px;">✅ Actions recommandées :</h4>
+                        <ul style="margin-left: 20px;">
+                            ${data.actions.map(action => `<li style="margin: 8px 0;">${action}</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function saveEmotionEntry() {
+            const journal = document.getElementById('emotionJournal').value;
+            if (!selectedEmotion || journal.trim() === '') {
+                alert('Sélectionne une émotion et écris quelque chose !');
+                return;
+            }
+            
+            const entries = JSON.parse(localStorage.getItem('emotionEntries')) || [];
+            const entry = {
+                emotion: selectedEmotion,
+                text: journal,
+                date: new Date().toLocaleString('fr-FR'),
+                timestamp: Date.now()
+            };
+            entries.unshift(entry);
+            
+            localStorage.setItem('emotionEntries', JSON.stringify(entries.slice(0, 50)));
+            
+            // Aussi sauvegarder pour les stats
+            const emotionStats = JSON.parse(localStorage.getItem('emotionStats')) || [];
+            emotionStats.push({
+                emotion: selectedEmotion,
+                timestamp: Date.now(),
+                date: new Date().toISOString()
+            });
+            localStorage.setItem('emotionStats', JSON.stringify(emotionStats));
+            
+            document.getElementById('emotionJournal').value = '';
+            loadJournalEntries();
+            
+            alert('✅ Ton ressenti est enregistré !');
+        }
+        
+        function loadJournalEntries() {
+            const entries = JSON.parse(localStorage.getItem('emotionEntries')) || [];
+            const container = document.getElementById('journalEntries');
+            
+            if (entries.length === 0) return;
+            
+            container.innerHTML = '<h3 style="margin-top: 30px;">📚 Mes dernières entrées</h3>';
+            entries.forEach(entry => {
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'result-box';
+                entryDiv.style.marginTop = '15px';
+                entryDiv.innerHTML = `
+                    <strong>${entry.emotion.charAt(0).toUpperCase() + entry.emotion.slice(1)} - ${entry.date}</strong>
+                    <p style="margin-top: 10px;">${entry.text}</p>
+                `;
+                container.appendChild(entryDiv);
+            });
+        }
+
+        // RÉSOLUTION DE PROBLÈME
+        function solveProblem() {
+            const before = document.getElementById('problemBefore').value;
+            const behavior = document.getElementById('problemBehavior').value;
+            const after = document.getElementById('problemAfter').value;
+            const functionSelect = document.getElementById('problemFunction').value;
+            const alternative = document.getElementById('problemAlternative').value;
+            const firstStep = document.getElementById('problemFirstStep').value;
+            
+            if (!before || !behavior || !after || !functionSelect || !alternative || !firstStep) {
+                alert('Remplis tous les champs pour faire ton analyse fonctionnelle !');
+                return;
+            }
+            
+            const functions = {
+                escape: {
+                    name: 'Éviter/Échapper',
+                    icon: '🏃',
+                    explanation: 'Ton comportement sert à éviter quelque chose de désagréable (stress, ennui, difficulté). C\'est une stratégie d\'évitement.',
+                    tips: [
+                        'Identifie ce que tu évites exactement (l\'émotion ? la difficulté ? l\'échec potentiel ?)',
+                        'Trouve des moyens plus adaptatés de gérer ce que tu évites',
+                        'Découpe la tâche évitée en micro-étapes moins menaçantes',
+                        'Utilise des techniques de régulation émotionnelle avant de commencer'
+                    ]
+                },
+                attention: {
+                    name: 'Obtenir de l\'attention',
+                    icon: '👋',
+                    explanation: 'Ton comportement attire l\'attention des autres, même si c\'est négatif. Tu as besoin d\'être vu et reconnu.',
+                    tips: [
+                        'Trouve des moyens positifs d\'obtenir de l\'attention',
+                        'Communique directement ton besoin d\'être écouté',
+                        'Planifie des moments de qualité avec les autres',
+                        'Demande explicitement ce dont tu as besoin'
+                    ]
+                },
+                tangible: {
+                    name: 'Obtenir quelque chose',
+                    icon: '🎁',
+                    explanation: 'Ton comportement te permet d\'obtenir quelque chose que tu veux (activité plaisante, stimulation, dopamine).',
+                    tips: [
+                        'Utilise un système de récompenses structuré',
+                        'Planifie les activités plaisantes APRÈS les tâches',
+                        'Trouve des alternatives qui te donnent satisfaction sans procrastiner',
+                        'Crée un équilibre entre effort et récompense'
+                    ]
+                },
+                sensory: {
+                    name: 'Stimulation sensorielle',
+                    icon: '⚡',
+                    explanation: 'Ton comportement répond à un besoin de stimulation sensorielle. Ton cerveau TDAH a besoin de bouger, toucher, stimuler.',
+                    tips: [
+                        'Intègre du mouvement dans ton travail (ballon, bureau debout, marche)',
+                        'Utilise des fidgets pendant les tâches',
+                        'Prévois des pauses actives toutes les 25 minutes',
+                        'Accepte que ton corps a besoin de bouger pour te concentrer'
+                    ]
+                }
+            };
+            
+            const selectedFunction = functions[functionSelect];
+            
+            const resultDiv = document.getElementById('problemResult');
+            resultDiv.innerHTML = `
+                <div class="result-box">
+                    <h3>📊 Ton analyse fonctionnelle</h3>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <p><strong>🔍 Situation :</strong> ${before}</p>
+                        <p style="margin-top: 10px;"><strong>⚠️ Comportement :</strong> ${behavior}</p>
+                        <p style="margin-top: 10px;"><strong>➡️ Conséquence :</strong> ${after}</p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; margin: 15px 0;">
+                        <h4 style="margin-bottom: 10px;">${selectedFunction.icon} Fonction identifiée : ${selectedFunction.name}</h4>
+                        <p>${selectedFunction.explanation}</p>
+                    </div>
+                    
+                    <div style="background: white; padding: 15px; border-radius: 10px; margin: 15px 0; border: 2px solid var(--secondary);">
+                        <h4 style="color: var(--secondary); margin-bottom: 10px;">💡 Stratégies recommandées :</h4>
+                        <ul style="margin-left: 20px;">
+                            ${selectedFunction.tips.map(tip => `<li style="margin: 8px 0;">${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div style="background: #e8f5e9; padding: 15px; border-radius: 10px; margin: 15px 0;">
+                        <h4 style="color: var(--success); margin-bottom: 10px;">✅ Comportement alternatif :</h4>
+                        <p style="font-size: 1.1rem;">${alternative}</p>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, var(--accent) 0%, var(--warning) 100%); padding: 20px; border-radius: 10px; color: var(--dark); margin-top: 15px;">
+                        <h4 style="margin-bottom: 10px;">🚀 PREMIÈRE ACTION MAINTENANT :</h4>
+                        <p style="font-size: 1.2rem; font-weight: 600;">${firstStep}</p>
+                    </div>
+                    
+                    <p style="margin-top: 15px; font-style: italic; color: #666;">
+                        💡 Astuce : Le changement prend du temps. Observe les déclencheurs (AVANT), teste ton alternative progressivement, 
+                        et ajuste jusqu'à trouver ce qui marche POUR TOI. Sois patient et bienveillant avec toi-même.
+                    </p>
+                </div>
+            `;
+            
+            // Ajouter automatiquement comme tâche urgente
+            const task = {
+                id: Date.now(),
+                text: firstStep,
+                priority: 'urgent',
+                completed: false,
+                date: new Date().toLocaleDateString('fr-FR')
+            };
+            tasks.push(task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            
+            // Scroll vers le résultat
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // TIMER POMODORO
+        let timerInterval;
+        let timeLeft = 1500; // 25 minutes en secondes
+        let isRunning = false;
+        
+        function startTimer() {
+            if (isRunning) return;
+            isRunning = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isRunning = false;
+                    alert('🎉 Bravo ! Session terminée ! Prends une pause de 5 minutes.');
+                    playSound();
+                }
+            }, 1000);
+        }
+        
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+        }
+        
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            const duration = document.getElementById('timerDuration').value;
+            timeLeft = duration * 60;
+            updateTimerDisplay();
+        }
+        
+        function changeTimerDuration() {
+            resetTimer();
+        }
+        
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById('timerDisplay').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        function playSound() {
+            // Simple beep avec Web Audio API
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 800;
+            oscillator.connect(audioContext.destination);
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+
+        // RECOMMANDATIONS SITUATIONNELLES
+        function showSituation(situationType) {
+            const situations = {
+                procrastination: {
+                    title: '⏰ Procrastination - Briser le cercle',
+                    strategies: [
+                        '<strong>La règle des 2 minutes :</strong> Commence juste 2 minutes. Une fois lancé, c\'est plus facile de continuer.',
+                        '<strong>Découpe ultra-fin :</strong> Si la tâche semble énorme, découpe-la en étapes de 5 minutes max.',
+                        '<strong>Change de lieu :</strong> Va dans une autre pièce, un café, dehors. Parfois le lieu bloque.',
+                        '<strong>Récompense immédiate :</strong> Promets-toi quelque chose de plaisant JUSTE APRÈS (pas après tout, après la première étape).',
+                        '<strong>Timer inversé :</strong> "Je travaille jusqu\'à 15h37" plutôt que "pendant 30 minutes" (bizarrement ça marche mieux).',
+                        '<strong>Body double :</strong> Travaille à côté de quelqu\'un, même en silence, même en visio.'
+                    ],
+                    immediate: 'Choisis LA PLUS PETITE action possible et lance-toi maintenant, même si c\'est juste ouvrir le fichier.'
+                },
+                submergé: {
+                    title: '🌊 Submergé - Retrouver la surface',
+                    strategies: [
+                        '<strong>Brain dump total :</strong> Écris TOUT ce qui te stresse sur papier, sans ordre, pendant 5 minutes.',
+                        '<strong>Catégorise après :</strong> Une fois tout sorti, regroupe par thèmes (urgent/important/peut attendre/peut déléguer).',
+                        '<strong>La règle du 1 :</strong> Choisis UNE SEULE mini-tâche. Le reste n\'existe pas pour les 15 prochaines minutes.',
+                        '<strong>Respiration 4-7-8 :</strong> Inspire 4s, retiens 7s, expire 8s. Répète 4 fois. Ça calme le système nerveux.',
+                        '<strong>Accepte l\'imperfection :</strong> Fait > Parfait. Toujours.',
+                        '<strong>Demande de l\'aide :</strong> Déléguer n\'est pas échouer, c\'est être intelligent.'
+                    ],
+                    immediate: 'Arrête tout. Respire. Fais une liste. Choisis UN truc. Juste un.'
+                },
+                distraction: {
+                    title: '🎯 Concentration impossible - Créer une bulle',
+                    strategies: [
+                        '<strong>Mode avion total :</strong> Téléphone en avion, notifications OFF partout, ferme TOUS les onglets sauf 1.',
+                        '<strong>Musique spécifique :</strong> Crée UNE playlist "focus" et utilise toujours la même (ton cerveau va l\'associer au travail).',
+                        '<strong>Timer courts :</strong> 15 minutes de focus, puis 5 minutes de distraction autorisée. Alterne.',
+                        '<strong>Change de sens :</strong> Si tu ne peux pas lire, essaie d\'écouter. Si tu ne peux pas écrire, dicte à voix haute.',
+                        '<strong>Accepte le mouvement :</strong> Ballon d\'assise, fidget, marche en réfléchissant. Bouge pendant que tu travailles.',
+                        '<strong>Gamification :</strong> Transforme la tâche en jeu ou challenge avec timer.'
+                    ],
+                    immediate: 'Élimine UNE distraction maintenant. Juste une. Puis focus 10 minutes.'
+                },
+                hyperfocus: {
+                    title: '🔥 Hyperfocus - Canaliser la puissance',
+                    strategies: [
+                        '<strong>Profite mais protège :</strong> C\'est un super-pouvoir ! Mais mets des alarmes pour boire/manger/bouger.',
+                        '<strong>Capture tes idées :</strong> Note tout ce qui te vient sans quitter ta tâche (doc à côté ou vocal).',
+                        '<strong>Timer de pause forcée :</strong> Toutes les 90 minutes MAX, lève-toi 5 minutes (même si tu ne veux pas).',
+                        '<strong>Prépare l\'environnement :</strong> Avant de plonger : eau, snacks, toilettes, téléphone loin.',
+                        '<strong>Choisis tes combats :</strong> Garde l\'hyperfocus pour les tâches importantes, pas pour scroller.',
+                        '<strong>Préviens ton entourage :</strong> Dis que tu seras indispo pendant X temps.'
+                    ],
+                    immediate: 'Mets un timer pour dans 60 minutes pour faire une pause. Vraiment.'
+                },
+                transitions: {
+                    title: '🔄 Transitions difficiles - Adoucir les changements',
+                    strategies: [
+                        '<strong>Timer de prévenance :</strong> Mets une alarme 10 min AVANT de devoir changer d\'activité.',
+                        '<strong>Rituel de transition :</strong> Crée une mini-routine (ex: 3 grandes respirations + ranger son espace).',
+                        '<strong>Prépare le suivant :</strong> Avant de finir A, pose 1 élément pour démarrer B (ouvre le doc, sors le matériel).',
+                        '<strong>Accepte le temps mort :</strong> Autorise-toi 5 minutes de "rien" entre deux tâches.',
+                        '<strong>Musique pont :</strong> Une chanson spécifique pour marquer la transition.',
+                        '<strong>Checklist visuelle :</strong> Coche visuellement "Tâche A terminée" avant de passer à B.'
+                    ],
+                    immediate: 'Termine ce que tu fais dans les 5 prochaines minutes, même imparfaitement, puis fais une pause vraie de 5 min.'
+                },
+                matin: {
+                    title: '🌅 Démarrage difficile - Routine de lancement',
+                    strategies: [
+                        '<strong>Prépare la veille :</strong> Vêtements sortis, petit-déj préparé, sac prêt. Ton toi du matin te remerciera.',
+                        '<strong>Alarme progressive :</strong> Lumière douce qui augmente + sons de nature plutôt qu\'alarme agressive.',
+                        '<strong>Routine ultra-simple :</strong> 3-5 actions TOUJOURS dans le même ordre (cerveau en pilote auto).',
+                        '<strong>Pas de décisions le matin :</strong> Tout doit être décidé la veille (habits, petit-déj, première tâche).',
+                        '<strong>Lumière et mouvement :</strong> Ouvre fenêtre + 5 étirements = signal "jour" pour ton cerveau.',
+                        '<strong>Pas de téléphone avant :</strong> Termine ta routine AVANT de regarder ton tel (sinon tu y passes 1h).'
+                    ],
+                    immediate: 'Ce soir, prépare TOUT pour demain matin. Littéralement tout.'
+                },
+                soir: {
+                    title: '🌙 Coucher difficile - Rituel d\'atterrissage',
+                    strategies: [
+                        '<strong>Heure fixe non-négociable :</strong> Même heure de coucher 7j/7. Ton cerveau a besoin de routine.',
+                        '<strong>Routine de "descente" :</strong> Commence 1h avant : lumières basses, activités calmes, température fraîche.',
+                        '<strong>Brain dump du soir :</strong> Vide toutes tes pensées/to-do de demain sur papier. Libère ton cerveau.',
+                        '<strong>Zéro écran 30 min avant :</strong> Vraiment. La lumière bleue détruit ton endormissement.',
+                        '<strong>Activité ennuyeuse :</strong> Lis quelque chose de chiant, écoute un podcast monotone.',
+                        '<strong>Accepte le temps :</strong> S\'endormir prend du temps, c\'est normal. Ne stresse pas.'
+                    ],
+                    immediate: 'Éteins tous les écrans MAINTENANT et fais ton brain dump sur papier.'
+                },
+                social: {
+                    title: '👥 Situations sociales - Naviguer les interactions',
+                    strategies: [
+                        '<strong>Prépare des scripts :</strong> Phrases toutes faites pour small talk ("Et toi, ça va ?", "Intéressant !").',
+                        '<strong>Pauses stratégiques :</strong> Va aux toilettes pour respirer et recharger en énergie sociale.',
+                        '<strong>Limite temporelle :</strong> "Je peux rester jusqu\'à 20h" (ça diminue l\'anxiété).',
+                        '<strong>Trouve ton rôle :</strong> Aide en cuisine, sers à boire... Avoir une fonction aide à gérer l\'interaction.',
+                        '<strong>Ami ancre :</strong> Va avec quelqu\'un que tu connais bien qui te sécurise.',
+                        '<strong>Après-social :</strong> Prévois du temps seul après pour te ressourcer.'
+                    ],
+                    immediate: 'Si c\'est trop : excuse-toi 5 min, va respirer dehors ou aux toilettes. Reviens si tu peux.'
+                },
+                decisions: {
+                    title: '🤔 Paralysie décisionnelle - Sortir du blocage',
+                    strategies: [
+                        '<strong>Limite les options :</strong> Max 3 choix. Plus = paralysie.',
+                        '<strong>Timer décision :</strong> 5 minutes pour décider, puis tu DOIS choisir.',
+                        '<strong>Pile ou face :</strong> Lance une pièce. Si tu es déçu du résultat, tu sais ce que tu veux vraiment.',
+                        '<strong>Et si je me trompe ?</strong> La plupart des décisions sont réversibles. Commence, ajuste ensuite.',
+                        '<strong>Délègue :</strong> Demande à quelqu\'un de confiance de choisir pour toi.',
+                        '<strong>Coût d\'opportunité :</strong> Ne pas décider est aussi une décision (souvent la pire).'
+                    ],
+                    immediate: 'Choisis maintenant. Sérieusement. Lance un dé si nécessaire. GO.'
+                },
+                rejection: {
+                    title: '💔 Sensibilité au rejet - Adoucir la blessure',
+                    strategies: [
+                        '<strong>RSD est réel :</strong> Rejection Sensitive Dysphoria touche 99% des TDAH. Tu n\'es pas "trop sensible".',
+                        '<strong>Pause avant réaction :</strong> Attends 24h avant de répondre quand tu te sens rejeté.',
+                        '<strong>Questionne l\'interprétation :</strong> "Est-ce vraiment un rejet ou je surinterprète ?"',
+                        '<strong>Parle-en :</strong> "J\'ai senti que... est-ce que j\'interprète mal ?" (souvent tu interprètes mal).',
+                        '<strong>Liste des preuves d\'amour :</strong> Garde une note avec des messages gentils reçus, à relire en cas de RSD.',
+                        '<strong>Auto-compassion :</strong> Parle-toi comme à ton meilleur ami. Avec douceur.'
+                    ],
+                    immediate: 'Respire. C\'est probablement ton cerveau TDAH qui exagère. Attends demain pour analyser.'
+                },
+                impulsivité: {
+                    title: '⚡ Impulsivité - Créer un espace de réflexion',
+                    strategies: [
+                        '<strong>Règle des 24h :</strong> Achats/décisions importantes = attendre 24h minimum.',
+                        '<strong>Budget impulsivité :</strong> Autorise-toi X€/mois pour les achats impulsifs (limite les dégâts).',
+                        '<strong>Liste de souhaits :</strong> Note l\'envie au lieu d\'acheter. Revois la liste dans 1 semaine.',
+                        '<strong>Pause physique :</strong> Avant d\'agir, fais 10 squats ou sors 2 minutes. Ça calme l\'impulsion.',
+                        '<strong>Appel d\'un ami :</strong> "Je veux faire X, parle-moi 5 minutes" (souvent l\'impulsion passe).',
+                        '<strong>Canaux d\'énergie :</strong> Redirige l\'énergie vers du sport, de l\'art, quelque chose de productif.'
+                    ],
+                    immediate: 'Attends 10 minutes. Mets un timer. Si tu veux toujours après, ok.'
+                },
+                ennui: {
+                    title: '😑 Ennui intense - Nourrir le cerveau TDAH',
+                    strategies: [
+                        '<strong>Accepte-le :</strong> L\'ennui est PHYSIQUEMENT douloureux pour un cerveau TDAH. Ce n\'est pas de la faiblesse.',
+                        '<strong>Stimulation douce :</strong> Fidget, musique, gomme à mâcher pendant les tâches ennuyeuses.',
+                        '<strong>Gamifie :</strong> Transforme tout en jeu/challenge avec timer et récompenses.',
+                        '<strong>Body double :</strong> Travailler "avec" quelqu\'un (même en silence) rend moins ennuyeux.',
+                        '<strong>Alterne :</strong> 15 min tâche chiante, 5 min tâche fun. Alterne.',
+                        '<strong>Nouveauté :</strong> Change de lieu, de méthode, d\'outil. La nouveauté stimule le TDAH.'
+                    ],
+                    immediate: 'Mets de la musique, prends un fidget, et lance un timer de 15 minutes. Tu peux tout supporter 15 minutes.'
+                }
+            };
+            
+            const situationData = situations[situationType];
+            const resultDiv = document.getElementById('situationResult');
+            
+            resultDiv.innerHTML = `
+                <div class="result-box" style="margin-top: 30px;">
+                    <h3 style="color: var(--primary); margin-bottom: 20px;">${situationData.title}</h3>
+                    
+                    <div style="background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                        <h4 style="color: var(--secondary); margin-bottom: 15px;">📋 Stratégies à tester :</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            ${situationData.strategies.map(strategy => `
+                                <li style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                                    ${strategy}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, var(--accent) 0%, var(--warning) 100%); padding: 20px; border-radius: 10px; color: var(--dark);">
+                        <h4 style="margin-bottom: 10px;">⚡ ACTION IMMÉDIATE :</h4>
+                        <p style="font-size: 1.1rem; font-weight: 500;">${situationData.immediate}</p>
+                    </div>
+                </div>
+            `;
+            
+            // Scroll vers le résultat
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // SUGGESTIONS SELON L'ÉNERGIE
+        function suggestByEnergy(level) {
+            const suggestions = {
+                high: {
+                    title: '🚀 Haute énergie - Fonce !',
+                    tasks: [
+                        'Tâches complexes qui demandent de la réflexion',
+                        'Apprentissage de nouvelles compétences',
+                        'Projets créatifs ambitieux',
+                        'Tâches physiques ou sportives',
+                        'Conversations importantes ou difficiles',
+                        'Résolution de problèmes compliqués'
+                    ]
+                },
+                medium: {
+                    title: '⚡ Énergie moyenne - Équilibre',
+                    tasks: [
+                        'Tâches de routine bien établies',
+                        'Répondre aux emails',
+                        'Organiser et planifier',
+                        'Tâches ménagères légères',
+                        'Lecture ou apprentissage léger',
+                        'Appels téléphoniques standards'
+                    ]
+                },
+                low: {
+                    title: '🔋 Basse énergie - Douceur',
+                    tasks: [
+                        'Tâches automatiques et simples',
+                        'Ranger/trier (sans pression)',
+                        'Écouter des podcasts ou vidéos éducatives',
+                        'Faire des listes pour plus tard',
+                        'Méditation ou étirements doux',
+                        'Te reposer SANS CULPABILITÉ !'
+                    ]
+                }
+            };
+            
+            const suggestion = suggestions[level];
+            const resultDiv = document.getElementById('energySuggestions');
+            
+            resultDiv.innerHTML = `
+                <div class="result-box">
+                    <h3>${suggestion.title}</h3>
+                    <p><strong>Tâches recommandées :</strong></p>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        ${suggestion.tasks.map(task => `<li style="margin: 8px 0;">${task}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // STATISTIQUES ET GRAPHIQUES
+        let emotionsChart = null;
+        let tasksChart = null;
+        let currentPeriod = 'today';
+
+        function changeStatsPeriod(period) {
+            currentPeriod = period;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('btn-' + period).classList.add('active');
+            
+            // Mettre à jour le label
+            const labels = {
+                today: "aujourd'hui",
+                week: "cette semaine",
+                month: "ce mois"
+            };
+            document.getElementById('periodLabel').textContent = labels[period];
+            
+            // Mettre à jour les graphiques
+            updateStatsCharts();
+        }
+
+        function updateStatsCharts() {
+            updateEmotionsChart();
+            updateTasksChart();
+            updateSummaryStats();
+        }
+
+        function getDateRange(period) {
+            const now = Date.now();
+            let startDate;
+            
+            if (period === 'today') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                startDate = today.getTime();
+            } else if (period === 'week') {
+                startDate = now - (7 * 24 * 60 * 60 * 1000);
+            } else {
+                startDate = now - (30 * 24 * 60 * 60 * 1000);
+            }
+            
+            return { startDate, endDate: now };
+        }
+
+        function updateEmotionsChart() {
+            const emotionStats = JSON.parse(localStorage.getItem('emotionStats')) || [];
+            const { startDate, endDate } = getDateRange(currentPeriod);
+            
+            // Filtrer par période
+            const filteredEmotions = emotionStats.filter(e => 
+                e.timestamp >= startDate && e.timestamp <= endDate
+            );
+            
+            // Compter les émotions
+            const emotionCounts = {};
+            filteredEmotions.forEach(e => {
+                emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+            });
+            
+            // Si on regarde aujourd'hui, grouper par heure
+            let chartData;
+            if (currentPeriod === 'today') {
+                chartData = getEmotionsByHour(filteredEmotions);
+            } else {
+                chartData = {
+                    labels: Object.keys(emotionCounts),
+                    data: Object.values(emotionCounts)
+                };
+            }
+            
+            const ctx = document.getElementById('emotionsChart');
+            
+            // Détruire l'ancien graphique s'il existe
+            if (emotionsChart) {
+                emotionsChart.destroy();
+            }
+            
+            const emotionColors = {
+                joyeux: '#FFE66D',
+                calme: '#4ECDC4',
+                anxieux: '#FF6B6B',
+                frustré: '#FFB84D',
+                triste: '#95E1D3',
+                débordé: '#F38181',
+                excité: '#AA96DA',
+                fatigué: '#C7CEEA'
+            };
+            
+            emotionsChart = new Chart(ctx, {
+                type: currentPeriod === 'today' ? 'line' : 'bar',
+                data: {
+                    labels: chartData.labels,
+                    datasets: currentPeriod === 'today' ? 
+                        Object.keys(chartData.datasets).map(emotion => ({
+                            label: emotion.charAt(0).toUpperCase() + emotion.slice(1),
+                            data: chartData.datasets[emotion],
+                            borderColor: emotionColors[emotion] || '#999',
+                            backgroundColor: (emotionColors[emotion] || '#999') + '40',
+                            tension: 0.4,
+                            fill: true
+                        })) :
+                        [{
+                            label: 'Nombre de fois',
+                            data: chartData.data,
+                            backgroundColor: chartData.labels.map(label => emotionColors[label] || '#999')
+                        }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: currentPeriod === 'today'
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function getEmotionsByHour(emotions) {
+            const hours = Array.from({length: 24}, (_, i) => i + 'h');
+            const datasets = {};
+            
+            emotions.forEach(e => {
+                const date = new Date(e.timestamp);
+                const hour = date.getHours();
+                
+                if (!datasets[e.emotion]) {
+                    datasets[e.emotion] = new Array(24).fill(0);
+                }
+                datasets[e.emotion][hour]++;
+            });
+            
+            return { labels: hours, datasets };
+        }
+
+        function updateTasksChart() {
+            const { startDate, endDate } = getDateRange(currentPeriod);
+            
+            // Filtrer les tâches par période
+            const filteredTasks = tasks.filter(t => {
+                const taskDate = new Date(t.date.split('/').reverse().join('-')).getTime();
+                return taskDate >= startDate && taskDate <= endDate;
+            });
+            
+            const completed = filteredTasks.filter(t => t.completed).length;
+            const pending = filteredTasks.length - completed;
+            
+            const ctx = document.getElementById('tasksChart');
+            
+            if (tasksChart) {
+                tasksChart.destroy();
+            }
+            
+            tasksChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Complétées', 'En cours'],
+                    datasets: [{
+                        data: [completed, pending],
+                        backgroundColor: ['#51CF66', '#FFB84D'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateSummaryStats() {
+            const { startDate, endDate } = getDateRange(currentPeriod);
+            const emotionStats = JSON.parse(localStorage.getItem('emotionStats')) || [];
+            
+            // Tâches complétées
+            const filteredTasks = tasks.filter(t => {
+                const taskDate = new Date(t.date.split('/').reverse().join('-')).getTime();
+                return t.completed && taskDate >= startDate && taskDate <= endDate;
+            });
+            document.getElementById('totalTasksCompleted').textContent = filteredTasks.length;
+            
+            // Émotion dominante
+            const filteredEmotions = emotionStats.filter(e => 
+                e.timestamp >= startDate && e.timestamp <= endDate
+            );
+            
+            const emotionCounts = {};
+            filteredEmotions.forEach(e => {
+                emotionCounts[e.emotion] = (emotionCounts[e.emotion] || 0) + 1;
+            });
+            
+            if (Object.keys(emotionCounts).length > 0) {
+                const mostFrequent = Object.entries(emotionCounts)
+                    .sort((a, b) => b[1] - a[1])[0];
+                
+                const emotionEmojis = {
+                    joyeux: '😊',
+                    calme: '😌',
+                    anxieux: '😰',
+                    frustré: '😤',
+                    triste: '😢',
+                    débordé: '🤯',
+                    excité: '🤩',
+                    fatigué: '😴'
+                };
+                
+                document.getElementById('emotionMostFrequent').textContent = 
+                    emotionEmojis[mostFrequent[0]] + ' ' + mostFrequent[0].charAt(0).toUpperCase() + mostFrequent[0].slice(1);
+            } else {
+                document.getElementById('emotionMostFrequent').textContent = '-';
+            }
+        }
+
+        // POINTS D'ÉTAPE (MILESTONES)
+        function addMilestone() {
+            const text = prompt('Décris ton point d\'étape ou ton objectif :');
+            if (!text || text.trim() === '') return;
+            
+            const milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            milestones.push({
+                id: Date.now(),
+                text: text,
+                date: new Date().toLocaleString('fr-FR'),
+                completed: false
+            });
+            
+            localStorage.setItem('milestones', JSON.stringify(milestones));
+            loadMilestones();
+        }
+
+        function loadMilestones() {
+            const milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            const container = document.getElementById('milestonesList');
+            
+            if (milestones.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">Aucun point d\'étape pour le moment. Ajoute-en un !</p>';
+                return;
+            }
+            
+            container.innerHTML = milestones.map(m => `
+                <div class="milestone-item ${m.completed ? 'completed' : ''}">
+                    <div style="flex: 1;">
+                        <input type="checkbox" ${m.completed ? 'checked' : ''} 
+                               onchange="toggleMilestone(${m.id})" 
+                               style="margin-right: 10px; width: 20px; height: 20px; cursor: pointer;">
+                        <strong>${m.text}</strong>
+                        <div class="milestone-date">${m.date}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteMilestone(${m.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function toggleMilestone(id) {
+            const milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            const milestone = milestones.find(m => m.id === id);
+            if (milestone) {
+                milestone.completed = !milestone.completed;
+                localStorage.setItem('milestones', JSON.stringify(milestones));
+                loadMilestones();
+            }
+        }
+
+        function deleteMilestone(id) {
+            if (!confirm('Supprimer ce point d\'étape ?')) return;
+            let milestones = JSON.parse(localStorage.getItem('milestones')) || [];
+            milestones = milestones.filter(m => m.id !== id);
+            localStorage.setItem('milestones', JSON.stringify(milestones));
+            loadMilestones();
+        }
+
+        // Chargement initial
+        loadTasks();
+    </script>
+</body>
+</html>
