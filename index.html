@@ -6,6 +6,7 @@
     <title>Mon Assistant TDAH</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -517,6 +518,11 @@
 <body>
     <div class="container">
         <header>
+            <div style="text-align: right; margin-bottom: 10px;">
+                <a href="accueil.html" style="display: inline-block; padding: 10px 20px; background: #FF6B6B; color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s; font-size: 0.9rem;">
+                    🏠 Retour à l'accueil
+                </a>
+            </div>
             <div class="logo-container">
                 <img src="logo-petit-prince.webp" alt="Le Petit Prince" class="logo-img">
                 <h1>Mon Assistant TDAH</h1>
@@ -526,6 +532,7 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tasks')">📋 Mes Tâches</button>
+            <button class="tab-btn" onclick="switchTab('sequential')">📋 Créer un Séquentiel</button>
             <button class="tab-btn" onclick="switchTab('stats')">📊 Mes Statistiques</button>
             <button class="tab-btn" onclick="switchTab('problem')">🧩 Résoudre un Problème</button>
             <button class="tab-btn" onclick="switchTab('situations')">🎪 Situations du quotidien</button>
@@ -612,6 +619,62 @@
                 <textarea id="emotionJournal" placeholder="Décris ce qui se passe dans ta tête en ce moment... Qu'est-ce qui a déclenché cette émotion ?"></textarea>
                 <button onclick="saveEmotionEntry()">Enregistrer mon ressenti</button>
                 <div id="journalEntries"></div>
+            </div>
+        </div>
+
+        <!-- CRÉATION DE SÉQUENTIEL -->
+        <div id="sequential" class="tab-content">
+            <div class="card">
+                <h2 class="card-title"><span class="emoji">📋</span>Créer un Séquentiel Visuel</h2>
+                <p style="margin-bottom: 20px;">Crée un séquentiel visuel étape par étape avec des images et/ou du texte. Parfait pour structurer une routine, une tâche complexe ou une séquence d'actions !</p>
+                
+                <!-- Titre du séquentiel -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #FF6B6B; margin-bottom: 15px;">📝 Titre de ton séquentiel :</h3>
+                    <input type="text" id="sequentialTitle" placeholder="Ex: Ma routine du matin, Faire mes devoirs, Préparer mon sac..." style="width: 100%; padding: 15px; border: 2px solid #FF6B6B; border-radius: 10px; font-size: 1.1rem; font-family: 'Poppins', sans-serif; font-weight: 600;">
+                </div>
+
+                <!-- Liste des étapes -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #FF6B6B; margin-bottom: 15px;">📌 Étapes de ton séquentiel :</h3>
+                    <div id="sequentialSteps" style="display: flex; flex-direction: column; gap: 20px;">
+                        <!-- Les étapes seront ajoutées ici dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Bouton ajouter une étape -->
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px;">
+                    <button onclick="addSequentialStep()" style="flex: 1; min-width: 200px; padding: 15px; background: #51CF66; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                        ➕ Ajouter une étape
+                    </button>
+                    <button onclick="generateSequentialPDF()" style="flex: 1; min-width: 200px; padding: 15px; background: #4ECDC4; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                        📄 Générer le PDF
+                    </button>
+                    <button onclick="clearSequential()" style="flex: 1; min-width: 200px; padding: 15px; background: #FF6B6B; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                        🗑️ Tout effacer
+                    </button>
+                </div>
+
+                <!-- Message d'info -->
+                <div id="sequentialMessage" style="display: none; margin-top: 15px; padding: 15px; background: #D4EDDA; border: 2px solid #28A745; border-radius: 10px; color: #155724; font-weight: 600; text-align: center;"></div>
+            </div>
+
+            <!-- Carte d'aide -->
+            <div class="card" style="background: #FFF3E0; border: 2px solid #FF6B6B;">
+                <h3 style="color: #FF6B6B; margin-bottom: 15px;">💡 Comment créer ton séquentiel ?</h3>
+                <ol style="line-height: 2; margin-left: 20px;">
+                    <li><strong>Donne un titre</strong> à ton séquentiel (ex: "Ma routine du matin")</li>
+                    <li><strong>Ajoute des étapes</strong> une par une en cliquant sur "Ajouter une étape"</li>
+                    <li><strong>Pour chaque étape :</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Écris le texte de l'étape (ex: "Me brosser les dents")</li>
+                            <li>Optionnel : Ajoute une image (photo, pictogramme, dessin)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Réorganise</strong> les étapes avec les flèches ↑ ↓</li>
+                    <li><strong>Génère le PDF</strong> pour l'imprimer et l'afficher !</li>
+                </ol>
+                <p style="margin-top: 15px; font-style: italic; color: #666;">💡 Astuce : Les séquentiels visuels aident à décomposer les tâches complexes et à ne rien oublier !</p>
             </div>
         </div>
 
@@ -1917,6 +1980,269 @@
             milestones = milestones.filter(m => m.id !== id);
             localStorage.setItem('milestones', JSON.stringify(milestones));
             loadMilestones();
+        }
+
+        // FONCTIONS DU SÉQUENTIEL
+        let sequentialSteps = [];
+        let stepCounter = 0;
+
+        function addSequentialStep() {
+            stepCounter++;
+            const stepId = 'step-' + stepCounter;
+            
+            const stepData = {
+                id: stepId,
+                text: '',
+                image: null,
+                imageData: null
+            };
+            
+            sequentialSteps.push(stepData);
+            renderSequentialSteps();
+        }
+
+        function renderSequentialSteps() {
+            const container = document.getElementById('sequentialSteps');
+            
+            if (sequentialSteps.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">Aucune étape pour le moment. Clique sur "Ajouter une étape" pour commencer !</p>';
+                return;
+            }
+            
+            container.innerHTML = sequentialSteps.map((step, index) => `
+                <div style="background: #F8F9FA; padding: 20px; border-radius: 15px; border: 2px solid #E0E0E0;">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                        <div style="background: #FF6B6B; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; flex-shrink: 0;">
+                            ${index + 1}
+                        </div>
+                        <input type="text" 
+                               placeholder="Décris cette étape (ex: Me laver les mains)" 
+                               value="${step.text}"
+                               onchange="updateStepText('${step.id}', this.value)"
+                               style="flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; font-family: 'Poppins', sans-serif;">
+                        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+                            ${index > 0 ? `<button onclick="moveStep(${index}, -1)" style="width: 40px; height: 40px; background: #4ECDC4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">↑</button>` : ''}
+                            ${index < sequentialSteps.length - 1 ? `<button onclick="moveStep(${index}, 1)" style="width: 40px; height: 40px; background: #4ECDC4; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">↓</button>` : ''}
+                            <button onclick="deleteStep('${step.id}')" style="width: 40px; height: 40px; background: #FF6B6B; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.2rem;">🗑</button>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <label for="image-${step.id}" style="padding: 10px 20px; background: #51CF66; color: white; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                            📷 ${step.imageData ? 'Changer l\'image' : 'Ajouter une image'}
+                            <input type="file" id="image-${step.id}" accept="image/*" onchange="uploadStepImage('${step.id}', this)" style="display: none;">
+                        </label>
+                        ${step.imageData ? `
+                            <div style="position: relative; display: inline-block;">
+                                <img src="${step.imageData}" style="height: 80px; border-radius: 8px; border: 2px solid #51CF66;">
+                                <button onclick="removeStepImage('${step.id}')" style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; background: #FF6B6B; color: white; border: none; border-radius: 50%; cursor: pointer; font-size: 0.8rem;">✕</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateStepText(stepId, text) {
+            const step = sequentialSteps.find(s => s.id === stepId);
+            if (step) step.text = text;
+        }
+
+        async function uploadStepImage(stepId, input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const step = sequentialSteps.find(s => s.id === stepId);
+            if (!step) return;
+            
+            try {
+                // Afficher un message de chargement
+                showSequentialMessage('⏳ Upload de l\'image en cours...', 'info');
+                
+                // Créer FormData pour l'API Dropl
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Envoyer à l'API Dropl
+                const response = await fetch('https://api.dropl.fr/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur upload');
+                }
+                
+                const data = await response.json();
+                
+                // Convertir l'image en base64 pour l'affichage et le PDF
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    step.imageData = e.target.result;
+                    step.image = data.url || data.file_url || e.target.result;
+                    renderSequentialSteps();
+                    showSequentialMessage('✅ Image ajoutée !', 'success');
+                };
+                reader.readAsDataURL(file);
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                // En cas d'échec de l'API, on utilise quand même l'image locale
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    step.imageData = e.target.result;
+                    step.image = e.target.result;
+                    renderSequentialSteps();
+                    showSequentialMessage('✅ Image ajoutée !', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeStepImage(stepId) {
+            const step = sequentialSteps.find(s => s.id === stepId);
+            if (step) {
+                step.image = null;
+                step.imageData = null;
+                renderSequentialSteps();
+            }
+        }
+
+        function moveStep(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= sequentialSteps.length) return;
+            
+            const temp = sequentialSteps[index];
+            sequentialSteps[index] = sequentialSteps[newIndex];
+            sequentialSteps[newIndex] = temp;
+            
+            renderSequentialSteps();
+        }
+
+        function deleteStep(stepId) {
+            if (confirm('Supprimer cette étape ?')) {
+                sequentialSteps = sequentialSteps.filter(s => s.id !== stepId);
+                renderSequentialSteps();
+            }
+        }
+
+        function clearSequential() {
+            if (confirm('Effacer tout le séquentiel ?')) {
+                sequentialSteps = [];
+                stepCounter = 0;
+                document.getElementById('sequentialTitle').value = '';
+                renderSequentialSteps();
+                showSequentialMessage('🗑️ Séquentiel effacé', 'info');
+            }
+        }
+
+        function showSequentialMessage(message, type) {
+            const msgDiv = document.getElementById('sequentialMessage');
+            msgDiv.textContent = message;
+            msgDiv.style.display = 'block';
+            
+            if (type === 'info') {
+                msgDiv.style.background = '#D1ECF1';
+                msgDiv.style.borderColor = '#17A2B8';
+                msgDiv.style.color = '#0C5460';
+            } else if (type === 'success') {
+                msgDiv.style.background = '#D4EDDA';
+                msgDiv.style.borderColor = '#28A745';
+                msgDiv.style.color = '#155724';
+            }
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        async function generateSequentialPDF() {
+            const title = document.getElementById('sequentialTitle').value.trim();
+            
+            if (!title) {
+                alert('⚠️ Donne un titre à ton séquentiel !');
+                return;
+            }
+            
+            if (sequentialSteps.length === 0) {
+                alert('⚠️ Ajoute au moins une étape !');
+                return;
+            }
+            
+            showSequentialMessage('⏳ Génération du PDF en cours...', 'info');
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Titre
+                doc.setFontSize(24);
+                doc.setFont(undefined, 'bold');
+                doc.text(title, 105, 20, { align: 'center' });
+                
+                // Ligne de séparation
+                doc.setLineWidth(0.5);
+                doc.line(20, 25, 190, 25);
+                
+                let yPosition = 40;
+                const pageHeight = 280;
+                const stepHeight = 60;
+                
+                for (let i = 0; i < sequentialSteps.length; i++) {
+                    const step = sequentialSteps[i];
+                    
+                    // Nouvelle page si nécessaire
+                    if (yPosition + stepHeight > pageHeight) {
+                        doc.addPage();
+                        yPosition = 20;
+                    }
+                    
+                    // Numéro de l'étape (cercle)
+                    doc.setFillColor(255, 107, 107);
+                    doc.circle(25, yPosition, 8, 'F');
+                    doc.setTextColor(255, 255, 255);
+                    doc.setFontSize(14);
+                    doc.setFont(undefined, 'bold');
+                    doc.text(String(i + 1), 25, yPosition + 4, { align: 'center' });
+                    
+                    // Texte de l'étape
+                    doc.setTextColor(0, 0, 0);
+                    doc.setFontSize(14);
+                    doc.setFont(undefined, 'normal');
+                    const stepText = step.text || 'Étape sans description';
+                    doc.text(stepText, 40, yPosition + 4, { maxWidth: 100 });
+                    
+                    // Image si présente
+                    if (step.imageData) {
+                        try {
+                            doc.addImage(step.imageData, 'JPEG', 150, yPosition - 15, 40, 40);
+                        } catch (e) {
+                            console.error('Erreur ajout image:', e);
+                        }
+                    }
+                    
+                    // Ligne de séparation
+                    doc.setDrawColor(200, 200, 200);
+                    doc.line(20, yPosition + 25, 190, yPosition + 25);
+                    
+                    yPosition += stepHeight;
+                }
+                
+                // Pied de page
+                const today = new Date().toLocaleDateString('fr-FR');
+                doc.setFontSize(10);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Créé le ${today} avec Mon Assistant TDAH - SESSAD Petit Prince`, 105, 290, { align: 'center' });
+                
+                // Télécharger le PDF
+                const filename = title.toLowerCase().replace(/\s+/g, '-') + '.pdf';
+                doc.save(filename);
+                
+                showSequentialMessage('✅ PDF généré avec succès !', 'success');
+                
+            } catch (error) {
+                console.error('Erreur génération PDF:', error);
+                alert('❌ Erreur lors de la génération du PDF. Vérifie que toutes les images sont bien chargées.');
+            }
         }
 
         // Chargement initial

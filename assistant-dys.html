@@ -517,6 +517,11 @@
 <body>
     <div class="container">
         <header>
+            <div style="text-align: right; margin-bottom: 10px;">
+                <a href="accueil.html" style="display: inline-block; padding: 10px 20px; background: #4ECDC4; color: white; text-decoration: none; border-radius: 25px; font-weight: 600; transition: all 0.3s; font-size: 0.9rem;">
+                    🏠 Retour à l'accueil
+                </a>
+            </div>
             <div class="logo-container">
                 <img src="logo-petit-prince.webp" alt="Le Petit Prince" class="logo-img">
                 <h1>Mon Assistant Dys</h1>
@@ -570,13 +575,41 @@
         <div id="adapter" class="tab-content">
             <div class="card">
                 <h2 class="card-title"><span class="emoji">📖</span>Adaptateur de Texte pour Dyslexie</h2>
-                <p style="margin-bottom: 20px;">Colle ou écris ton texte ci-dessous, il sera automatiquement adapté avec une police dyslexie-friendly, des espacements agrandis et des options de personnalisation.</p>
+                <p style="margin-bottom: 20px;">Colle ou écris ton texte ci-dessous, OU uploade une image/photo/scan pour extraire le texte automatiquement !</p>
                 
+                <!-- Upload d'image avec API Dropl -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; margin-bottom: 30px; color: white;">
+                    <h3 style="color: white; margin-bottom: 15px;">📸 Extraire le texte d'une image</h3>
+                    <p style="margin-bottom: 15px; opacity: 0.9;">Prends une photo d'un document, d'une page de livre, ou uploade une capture d'écran. Le texte sera automatiquement extrait !</p>
+                    
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center;">
+                        <label for="imageUpload" style="flex: 1; min-width: 200px; padding: 15px; background: white; color: #667eea; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif; text-align: center; display: block;">
+                            📤 Choisir une image
+                            <input type="file" id="imageUpload" accept="image/*" onchange="uploadImageToDropl()" style="display: none;">
+                        </label>
+                        
+                        <button onclick="document.getElementById('imageUpload').click()" style="flex: 1; min-width: 200px; padding: 15px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                            📷 Prendre une photo
+                        </button>
+                    </div>
+                    
+                    <!-- Indicateur de chargement -->
+                    <div id="uploadStatus" style="display: none; margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.2); border-radius: 10px; text-align: center;">
+                        <div style="font-size: 1.5rem; margin-bottom: 10px;">⏳</div>
+                        <div style="font-weight: 600;">Extraction du texte en cours...</div>
+                    </div>
+                    
+                    <!-- Prévisualisation de l'image -->
+                    <div id="imagePreview" style="display: none; margin-top: 15px; text-align: center;">
+                        <img id="previewImg" style="max-width: 100%; max-height: 300px; border-radius: 10px; border: 3px solid white;" />
+                    </div>
+                </div>
+
                 <!-- Zone de saisie -->
                 <div style="margin-bottom: 30px;">
                     <h3 style="color: #4ECDC4; margin-bottom: 15px;">📝 Ton texte original :</h3>
                     <textarea id="originalText" 
-                              placeholder="Colle ou écris ton texte ici... Il sera automatiquement adapté en dessous !"
+                              placeholder="Colle ou écris ton texte ici... OU utilise l'upload d'image ci-dessus !"
                               oninput="updateAdaptedText()"
                               style="width: 100%; min-height: 200px; padding: 15px; border: 2px solid #4ECDC4; border-radius: 10px; font-size: 1rem; font-family: Arial, sans-serif; resize: vertical;"></textarea>
                 </div>
@@ -2032,6 +2065,75 @@
         }
 
         // FONCTIONS DE L'ADAPTATEUR DE TEXTE
+        async function uploadImageToDropl() {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
+            
+            if (!file) return;
+            
+            // Afficher la prévisualisation
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+            
+            // Afficher le status de chargement
+            document.getElementById('uploadStatus').style.display = 'block';
+            
+            try {
+                // Créer FormData pour l'upload
+                const formData = new FormData();
+                formData.append('file', file);
+                
+                // Envoyer à l'API Dropl
+                const response = await fetch('https://api.dropl.fr/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'upload: ' + response.status);
+                }
+                
+                const data = await response.json();
+                
+                // Extraire le texte de la réponse
+                // L'API Dropl retourne généralement un objet avec le texte extrait
+                let extractedText = '';
+                
+                if (data.text) {
+                    extractedText = data.text;
+                } else if (data.content) {
+                    extractedText = data.content;
+                } else if (data.extracted_text) {
+                    extractedText = data.extracted_text;
+                } else {
+                    // Si la structure est différente, convertir en JSON lisible
+                    extractedText = JSON.stringify(data, null, 2);
+                }
+                
+                // Mettre le texte dans la zone de texte
+                document.getElementById('originalText').value = extractedText;
+                updateAdaptedText();
+                
+                // Masquer le status de chargement
+                document.getElementById('uploadStatus').style.display = 'none';
+                
+                // Message de succès
+                alert('✅ Texte extrait avec succès ! Tu peux maintenant le personnaliser.');
+                
+            } catch (error) {
+                console.error('Erreur:', error);
+                document.getElementById('uploadStatus').style.display = 'none';
+                alert('❌ Erreur lors de l\'extraction du texte. Vérifie que l\'image est claire et lisible, puis réessaie.');
+            }
+        }
+
         function separateSyllables(text) {
             // Règles simples de séparation syllabique en français
             const vowels = 'aeiouyàâäéèêëïîôùûü';
