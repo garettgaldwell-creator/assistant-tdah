@@ -526,10 +526,9 @@
 
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('tasks')">📋 Mes Tâches</button>
-            <button class="tab-btn" onclick="switchTab('emotions')">❤️ Mes Émotions</button>
+            <button class="tab-btn" onclick="switchTab('adapter')">📖 Adaptateur de Texte</button>
             <button class="tab-btn" onclick="switchTab('stats')">📊 Mes Statistiques</button>
             <button class="tab-btn" onclick="switchTab('problem')">🧩 Résoudre un Problème</button>
-            <button class="tab-btn" onclick="switchTab('focus')">⏱️ Focus Timer</button>
             <button class="tab-btn" onclick="switchTab('situations')">🎪 Situations du quotidien</button>
             <button class="tab-btn" onclick="switchTab('tips')">💡 Astuces Dys</button>
         </div>
@@ -567,53 +566,144 @@
             </div>
         </div>
 
-        <!-- ÉMOTIONS -->
-        <div id="emotions" class="tab-content">
+        <!-- ADAPTATEUR DE TEXTE -->
+        <div id="adapter" class="tab-content">
             <div class="card">
-                <h2 class="card-title"><span class="emoji">🎭</span>Comment je me sens ?</h2>
-                <p>Clique sur l'émotion qui te correspond le mieux en ce moment :</p>
-                <div class="emotion-grid">
-                    <div class="emotion-card" onclick="selectEmotion('joyeux', this)">
-                        <div class="emotion-icon">😊</div>
-                        <div>Joyeux</div>
+                <h2 class="card-title"><span class="emoji">📖</span>Adaptateur de Texte pour Dyslexie</h2>
+                <p style="margin-bottom: 20px;">Colle ou écris ton texte ci-dessous, il sera automatiquement adapté avec une police dyslexie-friendly, des espacements agrandis et des options de personnalisation.</p>
+                
+                <!-- Zone de saisie -->
+                <div style="margin-bottom: 30px;">
+                    <h3 style="color: #4ECDC4; margin-bottom: 15px;">📝 Ton texte original :</h3>
+                    <textarea id="originalText" 
+                              placeholder="Colle ou écris ton texte ici... Il sera automatiquement adapté en dessous !"
+                              oninput="updateAdaptedText()"
+                              style="width: 100%; min-height: 200px; padding: 15px; border: 2px solid #4ECDC4; border-radius: 10px; font-size: 1rem; font-family: Arial, sans-serif; resize: vertical;"></textarea>
+                </div>
+
+                <!-- Options de personnalisation -->
+                <div style="background: #F0F8FF; padding: 20px; border-radius: 15px; margin-bottom: 30px;">
+                    <h3 style="color: #4ECDC4; margin-bottom: 15px;">⚙️ Options d'adaptation :</h3>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                        <!-- Taille de police -->
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">📏 Taille de police :</label>
+                            <select id="fontSize" onchange="updateAdaptedText()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;">
+                                <option value="16px">Normal (16px)</option>
+                                <option value="18px" selected>Grand (18px)</option>
+                                <option value="20px">Très grand (20px)</option>
+                                <option value="24px">Extra grand (24px)</option>
+                            </select>
+                        </div>
+
+                        <!-- Espacement entre les lignes -->
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">📐 Espacement lignes :</label>
+                            <select id="lineHeight" onchange="updateAdaptedText()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;">
+                                <option value="1.5">Normal (1.5)</option>
+                                <option value="1.8" selected>Large (1.8)</option>
+                                <option value="2.2">Très large (2.2)</option>
+                                <option value="2.5">Extra large (2.5)</option>
+                            </select>
+                        </div>
+
+                        <!-- Espacement entre les lettres -->
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">🔤 Espacement lettres :</label>
+                            <select id="letterSpacing" onchange="updateAdaptedText()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;">
+                                <option value="0px">Normal</option>
+                                <option value="1px" selected>Large (1px)</option>
+                                <option value="2px">Très large (2px)</option>
+                                <option value="3px">Extra large (3px)</option>
+                            </select>
+                        </div>
+
+                        <!-- Largeur des mots -->
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">📏 Espacement mots :</label>
+                            <select id="wordSpacing" onchange="updateAdaptedText()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;">
+                                <option value="0px">Normal</option>
+                                <option value="3px">Large (3px)</option>
+                                <option value="5px" selected>Très large (5px)</option>
+                                <option value="8px">Extra large (8px)</option>
+                            </select>
+                        </div>
+
+                        <!-- Couleur de fond -->
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">🎨 Couleur de fond :</label>
+                            <select id="bgColor" onchange="updateAdaptedText()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;">
+                                <option value="#FFFEF0" selected>Crème (recommandé)</option>
+                                <option value="#F0F8E8">Vert pâle</option>
+                                <option value="#FFF5E6">Pêche</option>
+                                <option value="#E8F4F8">Bleu pâle</option>
+                                <option value="#FFFFFF">Blanc</option>
+                            </select>
+                        </div>
+
+                        <!-- Police -->
+                        <div>
+                            <label style="font-weight: 600; display: block; margin-bottom: 8px;">✍️ Police :</label>
+                            <select id="fontFamily" onchange="updateAdaptedText()" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; font-family: 'Poppins', sans-serif;">
+                                <option value="Arial, sans-serif" selected>Arial (recommandé)</option>
+                                <option value="Verdana, sans-serif">Verdana</option>
+                                <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                                <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                                <option value="'Century Gothic', sans-serif">Century Gothic</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="emotion-card" onclick="selectEmotion('calme', this)">
-                        <div class="emotion-icon">😌</div>
-                        <div>Calme</div>
-                    </div>
-                    <div class="emotion-card" onclick="selectEmotion('anxieux', this)">
-                        <div class="emotion-icon">😰</div>
-                        <div>Anxieux</div>
-                    </div>
-                    <div class="emotion-card" onclick="selectEmotion('frustré', this)">
-                        <div class="emotion-icon">😤</div>
-                        <div>Frustré</div>
-                    </div>
-                    <div class="emotion-card" onclick="selectEmotion('triste', this)">
-                        <div class="emotion-icon">😢</div>
-                        <div>Triste</div>
-                    </div>
-                    <div class="emotion-card" onclick="selectEmotion('débordé', this)">
-                        <div class="emotion-icon">🤯</div>
-                        <div>Débordé</div>
-                    </div>
-                    <div class="emotion-card" onclick="selectEmotion('excité', this)">
-                        <div class="emotion-icon">🤩</div>
-                        <div>Excité</div>
-                    </div>
-                    <div class="emotion-card" onclick="selectEmotion('fatigué', this)">
-                        <div class="emotion-icon">😴</div>
-                        <div>Fatigué</div>
+
+                    <!-- Options supplémentaires (checkboxes) -->
+                    <div style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 20px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="syllables" onchange="updateAdaptedText()" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: 500;">Séparer les syllabes (ex: pa-ra-graphe)</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" id="alignLeft" onchange="updateAdaptedText()" checked style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: 500;">Alignement à gauche (évite justification)</span>
+                        </label>
                     </div>
                 </div>
-                <div id="emotionResult"></div>
+
+                <!-- Boutons d'action -->
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 30px;">
+                    <button onclick="copyAdaptedText()" style="flex: 1; min-width: 200px; padding: 15px; background: #51CF66; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                        📋 Copier le texte adapté
+                    </button>
+                    <button onclick="downloadAdaptedText()" style="flex: 1; min-width: 200px; padding: 15px; background: #4ECDC4; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                        💾 Télécharger en .txt
+                    </button>
+                    <button onclick="clearText()" style="flex: 1; min-width: 200px; padding: 15px; background: #FF6B6B; color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s; font-family: 'Poppins', sans-serif;">
+                        🗑️ Effacer
+                    </button>
+                </div>
+
+                <!-- Zone de texte adapté -->
+                <div style="margin-top: 30px;">
+                    <h3 style="color: #51CF66; margin-bottom: 15px;">✨ Texte adapté :</h3>
+                    <div id="adaptedText" style="width: 100%; min-height: 300px; padding: 25px; border: 3px solid #51CF66; border-radius: 15px; background: #FFFEF0; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word;"></div>
+                </div>
+
+                <!-- Message de confirmation -->
+                <div id="copyMessage" style="display: none; margin-top: 15px; padding: 15px; background: #D4EDDA; border: 2px solid #28A745; border-radius: 10px; color: #155724; font-weight: 600; text-align: center;">
+                    ✅ Texte copié dans le presse-papiers !
+                </div>
             </div>
 
-            <div class="card">
-                <h2 class="card-title"><span class="emoji">✍️</span>Journal émotionnel</h2>
-                <textarea id="emotionJournal" placeholder="Décris ce qui se passe dans ta tête en ce moment... Qu'est-ce qui a déclenché cette émotion ?"></textarea>
-                <button onclick="saveEmotionEntry()">Enregistrer mon ressenti</button>
-                <div id="journalEntries"></div>
+            <!-- Carte d'aide -->
+            <div class="card" style="background: #E8F5E9; border: 2px solid #4ECDC4;">
+                <h3 style="color: #4ECDC4; margin-bottom: 15px;">💡 Comment utiliser l'adaptateur ?</h3>
+                <ol style="line-height: 2; margin-left: 20px;">
+                    <li><strong>Colle ou écris ton texte</strong> dans la zone en haut</li>
+                    <li><strong>Personnalise</strong> les options selon tes préférences</li>
+                    <li><strong>Le texte est adapté automatiquement</strong> en temps réel</li>
+                    <li><strong>Copie ou télécharge</strong> le texte adapté quand tu es satisfait</li>
+                </ol>
+                <p style="margin-top: 15px; font-style: italic; color: #666;">💡 Astuce : Ces réglages sont là pour t'aider ! Teste différentes combinaisons pour trouver ce qui te convient le mieux.</p>
             </div>
         </div>
 
@@ -1939,6 +2029,111 @@
             milestones = milestones.filter(m => m.id !== id);
             localStorage.setItem('milestones', JSON.stringify(milestones));
             loadMilestones();
+        }
+
+        // FONCTIONS DE L'ADAPTATEUR DE TEXTE
+        function separateSyllables(text) {
+            // Règles simples de séparation syllabique en français
+            const vowels = 'aeiouyàâäéèêëïîôùûü';
+            const consonants = 'bcdfghjklmnpqrstvwxz';
+            
+            return text.split(' ').map(word => {
+                if (word.length <= 3) return word;
+                
+                let result = '';
+                for (let i = 0; i < word.length; i++) {
+                    result += word[i];
+                    const current = word[i].toLowerCase();
+                    const next = i < word.length - 1 ? word[i + 1].toLowerCase() : '';
+                    const nextNext = i < word.length - 2 ? word[i + 2].toLowerCase() : '';
+                    
+                    // Séparation entre consonne et voyelle
+                    if (vowels.includes(current) && consonants.includes(next)) {
+                        result += '-';
+                    }
+                    // Séparation entre deux consonnes différentes
+                    else if (consonants.includes(current) && consonants.includes(next) && current !== next) {
+                        result += '-';
+                    }
+                }
+                // Nettoyer les tirets en trop
+                return result.replace(/--+/g, '-').replace(/^-|-$/g, '');
+            }).join(' ');
+        }
+
+        function updateAdaptedText() {
+            const originalText = document.getElementById('originalText').value;
+            const fontSize = document.getElementById('fontSize').value;
+            const lineHeight = document.getElementById('lineHeight').value;
+            const letterSpacing = document.getElementById('letterSpacing').value;
+            const wordSpacing = document.getElementById('wordSpacing').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            const syllables = document.getElementById('syllables').checked;
+            const alignLeft = document.getElementById('alignLeft').checked;
+            
+            const adaptedDiv = document.getElementById('adaptedText');
+            
+            // Appliquer la séparation syllabique si demandée
+            let processedText = syllables ? separateSyllables(originalText) : originalText;
+            
+            // Mettre à jour le texte
+            adaptedDiv.textContent = processedText;
+            
+            // Appliquer les styles
+            adaptedDiv.style.fontSize = fontSize;
+            adaptedDiv.style.lineHeight = lineHeight;
+            adaptedDiv.style.letterSpacing = letterSpacing;
+            adaptedDiv.style.wordSpacing = wordSpacing;
+            adaptedDiv.style.background = bgColor;
+            adaptedDiv.style.fontFamily = fontFamily;
+            adaptedDiv.style.textAlign = alignLeft ? 'left' : 'justify';
+        }
+
+        function copyAdaptedText() {
+            const adaptedText = document.getElementById('adaptedText').textContent;
+            
+            if (!adaptedText) {
+                alert('Aucun texte à copier ! Écris d\'abord dans la zone de texte.');
+                return;
+            }
+            
+            navigator.clipboard.writeText(adaptedText).then(() => {
+                const message = document.getElementById('copyMessage');
+                message.style.display = 'block';
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
+            }).catch(err => {
+                alert('Erreur lors de la copie : ' + err);
+            });
+        }
+
+        function downloadAdaptedText() {
+            const adaptedText = document.getElementById('adaptedText').textContent;
+            
+            if (!adaptedText) {
+                alert('Aucun texte à télécharger ! Écris d\'abord dans la zone de texte.');
+                return;
+            }
+            
+            const blob = new Blob([adaptedText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'texte-adapte-' + new Date().toISOString().slice(0, 10) + '.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function clearText() {
+            if (confirm('Es-tu sûr de vouloir effacer tout le texte ?')) {
+                document.getElementById('originalText').value = '';
+                document.getElementById('adaptedText').textContent = '';
+                document.getElementById('copyMessage').style.display = 'none';
+            }
         }
 
         // Chargement initial
